@@ -18,6 +18,16 @@ aw<!DOCTYPE html>
     </style>
 </head>
 <body>
+    <!-- Start Overlay -->
+    <div id="start-overlay">
+        <div class="start-content">
+            <h1 class="game-title">Icy's Abenteuer Website</h1>
+            <p class="made-by">Made by Luis</p>
+            
+            <button id="play-button" class="play-btn">Hier lang bitte :-)</button>
+        </div>
+    </div>
+
     <!-- Info Overlay (Bottom Center) -->
     <div id="info-overlay">
         <h2 id="overlay-title">Title</h2>
@@ -32,6 +42,7 @@ aw<!DOCTYPE html>
             <li><kbd>S</kbd> / <kbd>↓</kbd> Rückwärts</li>
             <li><kbd>A</kbd> / <kbd>←</kbd> Links lenken</li>
             <li><kbd>D</kbd> / <kbd>→</kbd> Rechts lenken</li>
+            <li><kbd>E</kbd> Info anzeigen</li>
             <li><kbd>M</kbd> Missionen</li>
         </ul>
     </div>
@@ -64,6 +75,18 @@ aw<!DOCTYPE html>
         <span>⬇</span>
         <small>Bremse</small>
     </button>
+
+    <button id="info-btn" class="touch-button touch-only">
+        <span>ℹ️</span>
+        <small>Info</small>
+    </button>
+
+    <!-- Info Panel (shown by triggerAction) -->
+    <div id="action-info-panel">
+        <h3>🎮 Info</h3>
+        <p>Dies ist ein Test Info-Panel!</p>
+        <p>Aktiviert durch INFO Button (Touch) oder E-Taste (Desktop).</p>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script type="module" src="./src/main.js"></script>

@@ -2,9 +2,15 @@ import { touchControls } from '../ui/touchControls.js';
 
 export function createInput() {
     const keys = {};
+    const triggerAction = touchControls.getTriggerAction();
     
     window.addEventListener('keydown', (e) => {
         keys[e.key.toLowerCase()] = true;
+        
+        // E-Taste für Desktop triggerAction
+        if (e.key.toLowerCase() === 'e') {
+            triggerAction();
+        }
     });
     
     window.addEventListener('keyup', (e) => {

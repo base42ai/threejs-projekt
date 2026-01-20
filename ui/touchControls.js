@@ -7,7 +7,8 @@ export class TouchControls {
         this.touchInput = {
             steer: 0,      // -1 (left) to 1 (right)
             throttle: false,
-            brake: false
+            brake: false,
+            action: false  // INFO button
         };
 
         // Joystick state
@@ -30,6 +31,10 @@ export class TouchControls {
             brake: {
                 active: false,
                 touchId: null
+            },
+            info: {
+                active: false,
+                touchId: null
             }
         };
 
@@ -39,17 +44,19 @@ export class TouchControls {
             joystickBase: null,
             joystickStick: null,
             throttleBtn: null,
-            brakeBtn: null
+            brakeBtn: null,
+            infoBtn: null
         };
 
         this.init();
     }
 
     init() {
-        // Check if device supports touch
-        const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        // Check if device supports touch (navigator.maxTouchPoints or pointer:coarse)
+        const hasTouch = navigator.maxTouchPoints > 0;
+        const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
         
-        if (!hasTouch) {
+        if (!hasTouch && !isCoarsePointer) {
             console.log('Touch not supported, skipping touch controls');
             return;
         }
@@ -57,6 +64,7 @@ export class TouchControls {
         this.enabled = true;
         this.setupDOM();
         this.setupEventListeners();
+        this.preventMobileScrollZoom();
         
         console.log('🎮 Touch controls enabled');
     }
@@ -68,6 +76,7 @@ export class TouchControls {
         this.elements.joystickStick = document.getElementById('joystick-stick');
         this.elements.throttleBtn = document.getElementById('throttle-btn');
         this.elements.brakeBtn = document.getElementById('brake-btn');
+        this.elements.infoBtn = document.getElementById('info-btn');
 
         // Show touch controls on touch devices
         if (this.elements.joystickArea) {
@@ -77,56 +86,94 @@ export class TouchControls {
             this.elements.throttleBtn.style.display = 'flex';
             this.elements.brakeBtn.style.display = 'flex';
         }
+        if (this.elements.infoBtn) {
+            this.elements.infoBtn.style.display = 'flex';
+        }
     }
 
     setupEventListeners() {
-        // Prevent default touch behavior
+        // Joystick events with Pointer API
+        if (this.elements.joystickArea) {
+            this.elements.joystickArea.addEventListener('pointerdown', (e) => this.handleJoystickStart(e));
+            this.elements.joystickArea.addEventListener('pointermove', (e) => this.handleJoystickMove(e));
+            this.elements.joystickArea.addEventListener('pointerup', (e) => this.handleJoystickEnd(e));
+            this.elements.joystickArea.addEventListener('pointercancel', (e) => this.handleJoystickEnd(e));
+        }
+
+        // Throttle button events with Pointer API
+        if (this.elements.throttleBtn) {
+            this.elements.throttleBtn.addEventListener('pointerdown', (e) => this.handleButtonStart(e, 'throttle'));
+            this.elements.throttleBtn.addEventListener('pointerup', (e) => this.handleButtonEnd(e, 'throttle'));
+            this.elements.throttleBtn.addEventListener('pointercancel', (e) => this.handleButtonEnd(e, 'throttle'));
+        }
+
+        // Brake button events with Pointer API
+        if (this.elements.brakeBtn) {
+            this.elements.brakeBtn.addEventListener('pointerdown', (e) => this.handleButtonStart(e, 'brake'));
+            this.elements.brakeBtn.addEventListener('pointerup', (e) => this.handleButtonEnd(e, 'brake'));
+            this.elements.brakeBtn.addEventListener('pointercancel', (e) => this.handleButtonEnd(e, 'brake'));
+        }
+
+        // Info button events with Pointer API
+        if (this.elements.infoBtn) {
+            this.elements.infoBtn.addEventListener('pointerdown', (e) => this.handleInfoButtonStart(e));
+            this.elements.infoBtn.addEventListener('pointerup', (e) => this.handleButtonEnd(e, 'info'));
+            this.elements.infoBtn.addEventListener('pointercancel', (e) => this.handleButtonEnd(e, 'info'));
+        }
+    }
+
+    preventMobileScrollZoom() {
+        // Only prevent scroll/zoom on mobile in game area
+        if (!this.enabled) return;
+        
+        // Prevent default touch behavior on game canvas and controls
         document.addEventListener('touchmove', (e) => {
             // Only prevent default for our control elements
             if (e.target.closest('#joystick-area') || 
                 e.target.closest('#throttle-btn') || 
-                e.target.closest('#brake-btn')) {
+                e.target.closest('#brake-btn') ||
+                e.target.tagName === 'CANVAS') {
                 e.preventDefault();
             }
         }, { passive: false });
 
-        // Joystick events
-        if (this.elements.joystickArea) {
-            this.elements.joystickArea.addEventListener('touchstart', (e) => this.handleJoystickStart(e), { passive: false });
-            this.elements.joystickArea.addEventListener('touchmove', (e) => this.handleJoystickMove(e), { passive: false });
-            this.elements.joystickArea.addEventListener('touchend', (e) => this.handleJoystickEnd(e), { passive: false });
-            this.elements.joystickArea.addEventListener('touchcancel', (e) => this.handleJoystickEnd(e), { passive: false });
-        }
+        // Prevent pinch-zoom on canvas
+        document.addEventListener('gesturestart', (e) => {
+            if (e.target.tagName === 'CANVAS') {
+                e.preventDefault();
+            }
+        });
 
-        // Throttle button events
-        if (this.elements.throttleBtn) {
-            this.elements.throttleBtn.addEventListener('touchstart', (e) => this.handleButtonStart(e, 'throttle'), { passive: false });
-            this.elements.throttleBtn.addEventListener('touchend', (e) => this.handleButtonEnd(e, 'throttle'), { passive: false });
-            this.elements.throttleBtn.addEventListener('touchcancel', (e) => this.handleButtonEnd(e, 'throttle'), { passive: false });
-        }
-
-        // Brake button events
-        if (this.elements.brakeBtn) {
-            this.elements.brakeBtn.addEventListener('touchstart', (e) => this.handleButtonStart(e, 'brake'), { passive: false });
-            this.elements.brakeBtn.addEventListener('touchend', (e) => this.handleButtonEnd(e, 'brake'), { passive: false });
-            this.elements.brakeBtn.addEventListener('touchcancel', (e) => this.handleButtonEnd(e, 'brake'), { passive: false });
-        }
+        // Prevent double-tap zoom on canvas
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300 && e.target.tagName === 'CANVAS') {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
     }
 
     handleJoystickStart(e) {
         e.preventDefault();
         
-        if (this.joystick.active) return; // Already have a touch
+        // Only handle touch/pen pointers, not mouse
+        if (e.pointerType === 'mouse') return;
         
-        const touch = e.changedTouches[0];
+        if (this.joystick.active) return; // Already have a pointer
+        
         const rect = this.elements.joystickArea.getBoundingClientRect();
         
         this.joystick.active = true;
-        this.joystick.touchId = touch.identifier;
-        this.joystick.startX = touch.clientX - rect.left;
-        this.joystick.startY = touch.clientY - rect.top;
+        this.joystick.touchId = e.pointerId;
+        this.joystick.startX = e.clientX - rect.left;
+        this.joystick.startY = e.clientY - rect.top;
         this.joystick.currentX = this.joystick.startX;
         this.joystick.currentY = this.joystick.startY;
+        
+        // Capture pointer for this element
+        this.elements.joystickArea.setPointerCapture(e.pointerId);
         
         // Position joystick base
         this.elements.joystickBase.style.left = `${this.joystick.startX}px`;
@@ -140,22 +187,11 @@ export class TouchControls {
     handleJoystickMove(e) {
         e.preventDefault();
         
-        if (!this.joystick.active) return;
-        
-        // Find our touch
-        let touch = null;
-        for (let i = 0; i < e.touches.length; i++) {
-            if (e.touches[i].identifier === this.joystick.touchId) {
-                touch = e.touches[i];
-                break;
-            }
-        }
-        
-        if (!touch) return;
+        if (!this.joystick.active || e.pointerId !== this.joystick.touchId) return;
         
         const rect = this.elements.joystickArea.getBoundingClientRect();
-        this.joystick.currentX = touch.clientX - rect.left;
-        this.joystick.currentY = touch.clientY - rect.top;
+        this.joystick.currentX = e.clientX - rect.left;
+        this.joystick.currentY = e.clientY - rect.top;
         
         this.updateJoystickVisuals();
         this.updateJoystickInput();
@@ -164,20 +200,11 @@ export class TouchControls {
     handleJoystickEnd(e) {
         e.preventDefault();
         
-        // Check if our touch ended
-        let touchEnded = false;
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            if (e.changedTouches[i].identifier === this.joystick.touchId) {
-                touchEnded = true;
-                break;
-            }
-        }
-        
-        if (!touchEnded) return;
+        if (e.pointerId !== this.joystick.touchId) return;
         
         this.joystick.active = false;
         this.joystick.touchId = null;
-        this.touchInput.steer = 0;
+        this.touchInput.steer = 0; // Reset steer to 0 on release
         
         // Reset joystick visuals
         this.elements.joystickBase.style.opacity = '0.3';
@@ -224,12 +251,17 @@ export class TouchControls {
     handleButtonStart(e, buttonName) {
         e.preventDefault();
         
+        // Only handle touch/pen pointers, not mouse
+        if (e.pointerType === 'mouse') return;
+        
         if (this.buttons[buttonName].active) return; // Already pressed
         
-        const touch = e.changedTouches[0];
         this.buttons[buttonName].active = true;
-        this.buttons[buttonName].touchId = touch.identifier;
-        this.touchInput[buttonName] = true;
+        this.buttons[buttonName].touchId = e.pointerId;
+        this.touchInput[buttonName] = true; // Set boolean for throttle/brake
+        
+        // Capture pointer for this element
+        e.currentTarget.setPointerCapture(e.pointerId);
         
         // Visual feedback
         e.currentTarget.classList.add('active');
@@ -238,23 +270,50 @@ export class TouchControls {
     handleButtonEnd(e, buttonName) {
         e.preventDefault();
         
-        // Check if our touch ended
-        let touchEnded = false;
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            if (e.changedTouches[i].identifier === this.buttons[buttonName].touchId) {
-                touchEnded = true;
-                break;
-            }
-        }
-        
-        if (!touchEnded) return;
+        if (e.pointerId !== this.buttons[buttonName].touchId) return;
         
         this.buttons[buttonName].active = false;
         this.buttons[buttonName].touchId = null;
-        this.touchInput[buttonName] = false;
+        this.touchInput[buttonName] = false; // Reset boolean for throttle/brake
         
         // Visual feedback
         e.currentTarget.classList.remove('active');
+    }
+
+    handleInfoButtonStart(e) {
+        e.preventDefault();
+        
+        // Only handle touch/pen pointers, not mouse
+        if (e.pointerType === 'mouse') return;
+        
+        if (this.buttons.info.active) return; // Already pressed
+        
+        this.buttons.info.active = true;
+        this.buttons.info.touchId = e.pointerId;
+        
+        // Capture pointer for this element
+        e.currentTarget.setPointerCapture(e.pointerId);
+        
+        // Visual feedback
+        e.currentTarget.classList.add('active');
+        
+        // Trigger action immediately on press
+        this.triggerAction();
+    }
+
+    triggerAction() {
+        // Show info panel
+        const infoPanel = document.getElementById('action-info-panel');
+        if (infoPanel) {
+            infoPanel.classList.add('visible');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                infoPanel.classList.remove('visible');
+            }, 3000);
+        }
+        
+        console.log('🎮 INFO Button triggered!');
     }
 
     getTouchInput() {
@@ -265,8 +324,14 @@ export class TouchControls {
         return this.enabled && (
             this.joystick.active || 
             this.buttons.throttle.active || 
-            this.buttons.brake.active
+            this.buttons.brake.active ||
+            this.buttons.info.active
         );
+    }
+
+    // Expose triggerAction for external use (e.g., keyboard binding)
+    getTriggerAction() {
+        return () => this.triggerAction();
     }
 }
 

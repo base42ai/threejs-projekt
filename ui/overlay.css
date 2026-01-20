@@ -1,3 +1,78 @@
+/* Start Overlay */
+#start-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+#start-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.start-content {
+    text-align: center;
+    color: white;
+    max-width: 600px;
+    padding: 40px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.game-title {
+    font-size: 48px;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+.made-by {
+    font-size: 18px;
+    color: #aaa;
+    margin: 0 0 40px 0;
+    font-style: italic;
+}
+
+.play-btn {
+    margin-top: 30px;
+    padding: 15px 60px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #000;
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.play-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+    background: linear-gradient(45deg, #FFA500, #FFD700);
+}
+
+.play-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
 /* Overlay Container */
 #info-overlay {
     position: fixed;
@@ -145,6 +220,59 @@
     font-weight: bold;
     min-width: 20px;
     text-align: center;
+}
+
+/* Touch-only elements (hidden on desktop) */
+.touch-only {
+    display: none;
+}
+
+/* INFO Button styling */
+#info-btn {
+    bottom: 120px;
+    right: 20px;
+}
+
+#info-btn span {
+    font-size: 32px;
+}
+
+/* Action Info Panel */
+#action-info-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    border: 3px solid #4CAF50;
+    border-radius: 15px;
+    padding: 25px 35px;
+    max-width: 400px;
+    z-index: 3000;
+    color: white;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#action-info-panel.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#action-info-panel h3 {
+    margin: 0 0 15px 0;
+    font-size: 24px;
+    color: #4CAF50;
+    text-align: center;
+}
+
+#action-info-panel p {
+    margin: 10px 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #ddd;
 }
 
 /* Mission Menu Overlay */

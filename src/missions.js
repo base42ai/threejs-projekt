@@ -32,40 +32,16 @@ export const MISSIONS = {
         reward: 75
     },
     
-    lake_visitor: {
-        id: 'lake_visitor',
-        title: 'Seeblick',
-        description: 'Besuche den See',
+    castle_visitor: {
+        id: 'castle_visitor',
+        title: 'Ritterburg-Abenteuer',
+        description: 'Besuche die Ritterburg mit dem Drachen',
         type: MISSION_TYPES.VISIT_SPOT,
-        targetSpot: 'lake',
+        targetSpot: 'castle',
         target: 1,
         progress: 0,
         completed: false,
-        reward: 25
-    },
-    
-    town_explorer: {
-        id: 'town_explorer',
-        title: 'Stadtbummel',
-        description: 'Besuche die Stadt',
-        type: MISSION_TYPES.VISIT_SPOT,
-        targetSpot: 'town',
-        target: 1,
-        progress: 0,
-        completed: false,
-        reward: 25
-    },
-    
-    windmill_finder: {
-        id: 'windmill_finder',
-        title: 'Windmühlen-Jäger',
-        description: 'Finde die Windmühle',
-        type: MISSION_TYPES.VISIT_SPOT,
-        targetSpot: 'windmill',
-        target: 1,
-        progress: 0,
-        completed: false,
-        reward: 25
+        reward: 40
     },
     
     destruction_master: {
@@ -78,17 +54,6 @@ export const MISSIONS = {
         progress: 0,
         completed: false,
         reward: 150
-    },
-    
-    world_traveler: {
-        id: 'world_traveler',
-        title: 'Weltenbummler',
-        description: 'Besuche alle 5 Orte',
-        type: MISSION_TYPES.VISIT_SPOT,
-        target: 5,
-        progress: 0,
-        completed: false,
-        reward: 100
     }
 };
 

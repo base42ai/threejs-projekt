@@ -15,6 +15,9 @@ import { MissionUI } from './missionUI.js';
 import { audioManager } from './audio-synthetic.js';
 import { DustParticles, TireMarks, SpeedLines } from './effects.js';
 
+// Game started flag
+let gameStarted = false;
+
 // Renderer mit Schatten (from constants)
 const renderer = new THREE.WebGLRenderer({ antialias: RENDERER_SETTINGS.ANTIALIAS });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -220,8 +223,12 @@ window.addEventListener('resize', () => {
 });
 
 // Animation Loop
+let animationId = null;
+
 function animate() {
-    requestAnimationFrame(animate);
+    if (!gameStarted) return; // Don't animate until game starts
+    
+    animationId = requestAnimationFrame(animate);
 
     // Input-Zustand abrufen
     const input = getInputState();
@@ -442,5 +449,42 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// Animation starten
-animate();
+// Start Game Function
+function startGame() {
+    gameStarted = true;
+    
+    // Hide start overlay
+    const startOverlay = document.getElementById('start-overlay');
+    startOverlay.classList.add('hidden');
+    
+    // Remove overlay from DOM after transition
+    setTimeout(() => {
+        startOverlay.style.display = 'none';
+    }, 500);
+    
+    // Initialize audio manager
+    audioManager.init().then(() => {
+        // Load sound files (will fail gracefully if files don't exist)
+        audioManager.load('engine', 'assets/sounds/engine.mp3');
+        audioManager.load('explosion', 'assets/sounds/explosion.mp3');
+        audioManager.load('success', 'assets/sounds/success.mp3');
+        
+        // Set master volume from constants
+        audioManager.setMasterVolume(AUDIO.MASTER_VOLUME);
+        
+        // Start engine sound
+        engineSoundId = audioManager.loop('engine', { volume: AUDIO.ENGINE_VOLUME });
+        engineStarted = true;
+    });
+    
+    // Start animation loop
+    animate();
+    
+    console.log('🎮 Game Started!');
+}
+
+// Event listener for Play button
+document.getElementById('play-button').addEventListener('click', startGame);
+
+// Don't start animation automatically - wait for Play button
+// animate(); // Removed - now called in startGame()
