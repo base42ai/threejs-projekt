@@ -13,7 +13,7 @@ export class Car {
         
         // Check if mobile device for speed adjustment
         this.isMobile = navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
-        this.mobileSpeedMultiplier = 1.5; // 50% schneller auf Mobile
+        this.mobileSpeedMultiplier = 2.5; // 150% schneller auf Mobile
         
         // Jump physics
         this.verticalVelocity = 0;
