@@ -92,6 +92,47 @@ export class Minimap {
             this.ctx.strokeRect(pos.x - size/2, pos.y - size/2, size, size);
         }
     }
+    
+    // Draw ramps
+    drawRamps(ramps) {
+        this.ctx.fillStyle = 'rgba(255, 170, 0, 0.9)'; // Orange for ramps
+        this.ctx.strokeStyle = 'rgba(255, 140, 0, 1)';
+        this.ctx.lineWidth = 2;
+        
+        for (const ramp of ramps) {
+            const pos = this.worldToCanvas(ramp.position.x, ramp.position.z);
+            
+            this.ctx.save();
+            this.ctx.translate(pos.x, pos.y);
+            this.ctx.rotate(ramp.rotation);
+            
+            // Draw ramp as trapezoid
+            const width = 10;
+            const length = 15;
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(-width/2, -length/2);
+            this.ctx.lineTo(width/2, -length/2);
+            this.ctx.lineTo(width/2, length/2);
+            this.ctx.lineTo(-width/2, length/2);
+            this.ctx.closePath();
+            
+            this.ctx.fill();
+            this.ctx.stroke();
+            
+            // Draw stripes to indicate direction
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+            this.ctx.lineWidth = 1;
+            for (let i = -length/2 + 3; i < length/2; i += 4) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(-width/2, i);
+                this.ctx.lineTo(width/2, i);
+                this.ctx.stroke();
+            }
+            
+            this.ctx.restore();
+        }
+    }
 
     // Draw info spots
     drawInfoSpots(infoSpots, currentSpotId = null) {
@@ -199,6 +240,10 @@ export class Minimap {
         // Draw in layers (back to front)
         if (stateSnapshot.infoSpots) {
             this.drawInfoSpots(stateSnapshot.infoSpots, stateSnapshot.currentInfoSpot);
+        }
+
+        if (stateSnapshot.ramps) {
+            this.drawRamps(stateSnapshot.ramps);
         }
 
         if (stateSnapshot.colliders) {

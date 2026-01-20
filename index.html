@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+aw<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -36,8 +36,17 @@
         </ul>
     </div>
 
-    <!-- Minimap (Top Right, below controls) -->
+    <!-- Minimap (Top Left) -->
     <canvas id="minimap" width="200" height="200"></canvas>
+    
+    <!-- Mission Progress Display (Below Minimap) -->
+    <div id="mission-progress-display">
+        <div class="progress-title">Mission</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text" id="progress-text">0 / 0</div>
+    </div>
 
     <!-- Touch Controls (Mobile) -->
     <div id="joystick-area">

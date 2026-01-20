@@ -2,10 +2,23 @@ import { LIGHTING, WORLD_GEN } from './constants.js';
 
 export function createScene() {
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a1a);
+    
+    // Realistischer Himmel-Gradient
+    scene.background = new THREE.Color(0x87CEEB);
+    
+    // Nebel für Atmosphäre und Tiefe
+    scene.fog = new THREE.Fog(0x87CEEB, 100, 600);
 
-    // Licht mit Schatten (from constants)
-    const ambientLight = new THREE.AmbientLight(LIGHTING.AMBIENT_COLOR, LIGHTING.AMBIENT_INTENSITY);
+    // Hemisphere Light für realistisches Himmel/Boden-Licht
+    const hemisphereLight = new THREE.HemisphereLight(
+        0x87CEEB,  // Himmelfarbe (hellblau)
+        0x6B8E23,  // Bodenfarbe (olivgrün)
+        0.6
+    );
+    scene.add(hemisphereLight);
+    
+    // Ambient Light für sanfte Grundhelligkeit
+    const ambientLight = new THREE.AmbientLight(LIGHTING.AMBIENT_COLOR, 0.3);
     scene.add(ambientLight);
 
     const directionalLight = new THREE.DirectionalLight(LIGHTING.DIRECTIONAL_COLOR, LIGHTING.DIRECTIONAL_INTENSITY);
@@ -16,11 +29,11 @@ export function createScene() {
     );
     directionalLight.shadow.mapSize.width = LIGHTING.SHADOW_MAP_SIZE;
     directionalLight.shadow.mapSize.height = LIGHTING.SHADOW_MAP_SIZE;
-    directionalLight.shadow.camera.left = -300;
-    directionalLight.shadow.camera.right = 300;
-    directionalLight.shadow.camera.top = 300;
-    directionalLight.shadow.camera.bottom = -300;
-    directionalLight.shadow.camera.far = 500;
+    directionalLight.shadow.camera.left = -500;
+    directionalLight.shadow.camera.right = 500;
+    directionalLight.shadow.camera.top = 500;
+    directionalLight.shadow.camera.bottom = -500;
+    directionalLight.shadow.camera.far = 800;
     directionalLight.castShadow = true;
     scene.add(directionalLight);
 

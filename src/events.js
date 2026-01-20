@@ -44,6 +44,7 @@ export const EVENT_TYPES = {
     SPOT_ENTERED: 'spot_entered',
     SPOT_EXITED: 'spot_exited',
     MISSION_COMPLETE: 'mission_complete',
+    MISSION_PROGRESS: 'mission_progress',
     SCORE_CHANGED: 'score_changed',
     CAR_COLLISION: 'car_collision',
     GAME_PAUSE: 'game_pause',

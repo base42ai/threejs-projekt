@@ -1,12 +1,21 @@
 import { CAR_PHYSICS, WORLD_BOUNDS, ANIMATION } from './constants.js';
 
 export class Car {
-    constructor(scene) {
+    constructor(scene, terrain = null) {
         // Position, velocity, direction
         this.position = new THREE.Vector3(0, 0, 0);
         this.velocity = 0;
         this.direction = 0; // rotation in radians
         this.lateralVelocity = 0; // Seitliche Geschwindigkeit für Drift
+        
+        // Terrain reference für Höhenberechnung
+        this.terrain = terrain;
+        
+        // Jump physics
+        this.verticalVelocity = 0;
+        this.isAirborne = false;
+        this.groundLevel = 0;
+        this.gravity = -0.02; // Etwas weniger Gravitation für längere Flugzeit
         
         // Physics properties (from constants)
         this.maxSpeed = CAR_PHYSICS.MAX_SPEED;
@@ -199,10 +208,10 @@ export class Car {
         let steerInput = 0;
         
         if (input.steer !== undefined) {
-            steerInput = input.steer;
+            steerInput = -input.steer;  // Invertiert für korrekte Richtung
         } else {
-            if (input.left) steerInput = -1;
-            else if (input.right) steerInput = 1;
+            if (input.left) steerInput = 1;   // Links = positiv (nach links lenken)
+            else if (input.right) steerInput = -1;  // Rechts = negativ (nach rechts lenken)
         }
         
         // Ziel-Lenkwinkel setzen (deutlich sichtbar!)
@@ -220,14 +229,22 @@ export class Car {
         });
 
         // Lenkung - NUR wenn Auto fährt (echte Auto-Physik!)
-        if (Math.abs(this.velocity) > 0.05) {  // Höherer Schwellwert - Auto muss wirklich fahren
-            // Lenkgeschwindigkeit direkt proportional zur Geschwindigkeit
-            // Je schneller = desto weiter dreht es bei gleichem Lenkwinkel
-            this.rotationSpeed = -this.currentSteerAngle * Math.abs(this.velocity) * CAR_PHYSICS.TURN_SPEED_MULTIPLIER;
+        if (Math.abs(this.velocity) > CAR_PHYSICS.MIN_SPEED_TO_STEER) {
+            // Realistische Ackermann-Lenkung:
+            // Drehung basiert auf Lenkwinkel UND Geschwindigkeit
+            // Aber nicht einfach multipliziert - das wäre zu stark!
+            
+            // Basis-Drehrate vom Lenkwinkel
+            const baseTurnRate = this.currentSteerAngle * CAR_PHYSICS.TURN_RATE;
+            
+            // Geschwindigkeits-Einfluss (normalisiert)
+            const speedInfluence = Math.min(Math.abs(this.velocity) / this.maxSpeed, 1.0);
+            
+            // Finale Drehgeschwindigkeit: Basis + kleine Geschwindigkeitsabhängigkeit
+            this.rotationSpeed = baseTurnRate * (0.8 + speedInfluence * 0.2);
             
             // Drift bei hoher Geschwindigkeit und starker Lenkung
-            const speedFactor = Math.abs(this.velocity) / this.maxSpeed;
-            if (speedFactor > CAR_PHYSICS.DRIFT_THRESHOLD && Math.abs(steerInput) > 0.5) {
+            if (speedInfluence > CAR_PHYSICS.DRIFT_THRESHOLD && Math.abs(steerInput) > 0.5) {
                 this.lateralVelocity += steerInput * 0.002;
                 this.lateralVelocity *= CAR_PHYSICS.DRIFT_FACTOR;
             } else {
@@ -253,6 +270,38 @@ export class Car {
         
         this.position.x += moveX + lateralX;
         this.position.z += moveZ + lateralZ;
+        
+        // Terrain-Höhe berechnen (wenn nicht in der Luft)
+        if (this.terrain) {
+            const terrainHeight = this.terrain.getHeightAt(this.position.x, this.position.z);
+            this.groundLevel = terrainHeight;
+            
+            // Neigung des Terrains für Auto-Rotation
+            const slope = this.terrain.getSlopeAt(this.position.x, this.position.z);
+            
+            // Auto neigt sich mit dem Terrain
+            this.mesh.rotation.x = -slope.slopeZ; // Pitch (vor/zurück)
+            this.mesh.rotation.z = slope.slopeX;  // Roll (seitlich)
+        }
+        
+        // Sprung-Physik (Gravitation)
+        if (this.isAirborne) {
+            this.verticalVelocity += this.gravity;
+            this.position.y += this.verticalVelocity;
+            
+            // Landung
+            if (this.position.y <= this.groundLevel) {
+                this.position.y = this.groundLevel;
+                this.verticalVelocity = 0;
+                this.isAirborne = false;
+                
+                // Leichte Bremsung bei Landung
+                this.velocity *= 0.9;
+            }
+        } else {
+            // Auf dem Boden: Folge dem Terrain
+            this.position.y = this.groundLevel;
+        }
         
         this.mesh.position.copy(this.position);
 
@@ -293,5 +342,19 @@ export class Car {
 
     getBoundingBox() {
         return this.boundingBox;
+    }
+    
+    // Sprung von Rampe - GROSSER SPRUNG!
+    launchFromRamp(rampAngle, launchSpeed) {
+        if (!this.isAirborne) {
+            this.isAirborne = true;
+            this.groundLevel = this.position.y;
+            
+            // MAXIMALE Sprungkraft für spektakuläre Sprünge!
+            const jumpForce = Math.abs(launchSpeed) * 1.5; // 150% der Geschwindigkeit!
+            this.verticalVelocity = Math.sin(rampAngle) * jumpForce + 0.5; // +0.5 Basis-Boost
+            
+            console.log(`🚀 MEGA JUMP! Speed: ${launchSpeed.toFixed(2)}, Vertical Velocity: ${this.verticalVelocity.toFixed(3)}, Max Height: ~${(this.verticalVelocity * this.verticalVelocity / (2 * Math.abs(this.gravity))).toFixed(1)} units! 🌟`);
+        }
     }
 }

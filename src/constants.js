@@ -2,27 +2,27 @@
 
 // Car Physics
 export const CAR_PHYSICS = {
-    MAX_SPEED: 0.8,              // Höhere Maximalgeschwindigkeit
-    ACCELERATION: 0.015,          // Langsamere Beschleunigung (realistischer)
+    MAX_SPEED: 1.2,              // Höhere Geschwindigkeit!
+    ACCELERATION: 0.01,          // Langsamere Beschleunigung (von 0.015)
     BRAKE_FORCE: 0.04,           // Stärkere Bremskraft
-    FRICTION: 0.98,              // Weniger Reibung (Auto rollt weiter)
-    ROLLING_RESISTANCE: 0.008,   // Verlangsamung ohne Gas
-    TURN_SPEED: 0.025,
-    TURN_SPEED_MULTIPLIER: 1.8,
+    FRICTION: 0.97,              // Mehr Reibung (war 0.98)
+    ROLLING_RESISTANCE: 0.01,    // Mehr Rollwiderstand (war 0.008)
+    TURN_RATE: 0.025,            // Langsamere Lenkung (war 0.04)
     DRIFT_FACTOR: 0.92,          // Drift bei hoher Geschwindigkeit
     DRIFT_THRESHOLD: 0.4,        // Ab dieser Geschwindigkeit kann gedriftet werden
     REVERSE_SPEED_MULTIPLIER: 0.6, // Rückwärtsgang langsamer
     WEIGHT: 1200,                // Gewicht in kg (für Trägheit)
-    STEERING_RETURN_SPEED: 0.2,  // Lenkräder kehren zur Mitte zurück (schneller)
-    MAX_STEER_ANGLE: 0.7        // Maximaler Lenkwinkel (40°) - deutlich sichtbar!
+    STEERING_RETURN_SPEED: 0.12, // Lenkräder kehren langsamer zurück (war 0.2)
+    MAX_STEER_ANGLE: 0.6,        // Kleinerer Lenkwinkel (war 0.7)
+    MIN_SPEED_TO_STEER: 0.1      // Minimale Geschwindigkeit zum Lenken
 };
 
 // World Boundaries
 export const WORLD_BOUNDS = {
-    MIN_X: -240,
-    MAX_X: 240,
-    MIN_Z: -240,
-    MAX_Z: 240
+    MIN_X: -400,
+    MAX_X: 400,
+    MIN_Z: -400,
+    MAX_Z: 400
 };
 
 // Camera Settings
@@ -54,7 +54,7 @@ export const RENDERER_SETTINGS = {
 
 // World Generation
 export const WORLD_GEN = {
-    GROUND_SIZE: 500,
+    GROUND_SIZE: 1000,
     GROUND_COLOR: 0x3a8f3a,
     GRASS_SPOT_COUNT: 50,
     SKY_COLOR: 0x87CEEB,

@@ -13,6 +13,7 @@ import { MissionManager } from './missions.js';
 import { Minimap } from '../ui/minimap.js';
 import { MissionUI } from './missionUI.js';
 import { audioManager } from './audio-synthetic.js';
+import { DustParticles, TireMarks, SpeedLines } from './effects.js';
 
 // Renderer mit Schatten (from constants)
 const renderer = new THREE.WebGLRenderer({ antialias: RENDERER_SETTINGS.ANTIALIAS });
@@ -26,10 +27,10 @@ document.body.appendChild(renderer.domElement);
 const { scene } = createScene();
 
 // Welt erstellen (Bäume, Häuser, See, etc.)
-const { windmillBlades, infoSpots, colliders } = createWorld(scene);
+const { windmillBlades, infoSpots, colliders, ramps, roads, terrain, dragon } = createWorld(scene);
 
-// Auto erstellen
-const car = new Car(scene);
+// Auto erstellen (mit Terrain-Referenz)
+const car = new Car(scene, terrain);
 
 // Kamera erstellen
 const { camera, update: updateCamera } = createFollowCamera();
@@ -54,6 +55,33 @@ const minimap = new Minimap('minimap');
 
 // Mission UI erstellen
 const missionUI = new MissionUI(missionManager, gameState);
+
+// Realistische Effekte erstellen
+const dustParticles = new DustParticles(scene);
+const tireMarks = new TireMarks(scene);
+const speedLines = new SpeedLines(scene, camera);
+
+// Mission Progress Display UI
+const progressDisplay = document.getElementById('mission-progress-display');
+const progressFill = document.getElementById('progress-fill');
+const progressText = document.getElementById('progress-text');
+
+function updateMissionProgressDisplay() {
+    const activeMission = missionManager.getActiveMission();
+    
+    if (activeMission) {
+        const progress = missionManager.getMissionProgress();
+        if (progress) {
+            progressDisplay.classList.add('visible');
+            const percentage = (progress.progress / progress.target) * 100;
+            progressFill.style.width = `${percentage}%`;
+            progressFill.textContent = `${Math.round(percentage)}%`;
+            progressText.textContent = `${progress.progress} / ${progress.target}`;
+        }
+    } else {
+        progressDisplay.classList.remove('visible');
+    }
+}
 
 // Initialize audio manager and load sounds
 let engineSoundId = null;
@@ -144,6 +172,8 @@ events.on(EVENT_TYPES.SPOT_ENTERED, (data) => {
         events.emit(EVENT_TYPES.MISSION_COMPLETE, result.mission);
     } else if (result && result.progress !== undefined) {
         gameState.updateMissionProgress(result.progress);
+        events.emit(EVENT_TYPES.MISSION_PROGRESS, result);
+        updateMissionProgressDisplay();
     }
 });
 
@@ -162,6 +192,8 @@ events.on(EVENT_TYPES.CAR_COLLISION, (data) => {
         events.emit(EVENT_TYPES.MISSION_COMPLETE, result.mission);
     } else if (result && result.progress !== undefined) {
         gameState.updateMissionProgress(result.progress);
+        events.emit(EVENT_TYPES.MISSION_PROGRESS, result);
+        updateMissionProgressDisplay();
     }
 });
 
@@ -170,6 +202,9 @@ events.on(EVENT_TYPES.MISSION_COMPLETE, (mission) => {
     
     // Play success sound
     audioManager.play('success', { volume: AUDIO.SUCCESS_VOLUME });
+    
+    // Update display
+    updateMissionProgressDisplay();
     
     // Update UI
     if (missionUI) {
@@ -209,6 +244,16 @@ function animate() {
 
     // Check for collisions with crates
     const carBBox = car.getBoundingBox();
+    
+    // Check ramp collisions
+    for (const ramp of ramps) {
+        if (carBBox.intersectsBox(ramp.bbox) && !car.isAirborne) {
+            // Car hit a ramp - launch it!
+            car.launchFromRamp(ramp.angle, car.velocity);
+            break; // Only one ramp at a time
+        }
+    }
+    
     for (const collider of colliders) {
         if (collider.isActive && carBBox.intersectsBox(collider.bbox)) {
             // Collision detected!
@@ -246,6 +291,28 @@ function animate() {
 
     // Update particle system
     particleSystem.update();
+    
+    // Update realistische Effekte
+    dustParticles.update();
+    tireMarks.update();
+    speedLines.update(car.getPosition(), Math.abs(car.velocity));
+    
+    // Staub-Partikel spawnen bei schneller Fahrt
+    const speed = Math.abs(car.velocity);
+    if (speed > 0.2 && Math.random() < 0.3) {
+        const carPos = car.getPosition();
+        const dustPos = carPos.clone();
+        dustPos.x += (Math.random() - 0.5) * 2;
+        dustPos.z += (Math.random() - 0.5) * 2;
+        dustParticles.emit(dustPos, car.velocity);
+    }
+    
+    // Reifenspuren bei starker Lenkung oder Drift
+    if (speed > 0.15 && Math.abs(car.currentSteerAngle) > 0.3) {
+        const intensity = Math.min(speed * 2, 1.0);
+        const carPos = car.getPosition();
+        tireMarks.addMark(carPos, car.direction, intensity);
+    }
 
     // Update camera shake
     cameraShake.updateShake(camera);
@@ -253,6 +320,70 @@ function animate() {
     // Windmühlenflügel rotieren (from constants)
     if (windmillBlades) {
         windmillBlades.rotation.z += ANIMATION.WINDMILL_ROTATION_SPEED;
+    }
+    
+    // Drache um die Ritterburg laufen lassen
+    if (dragon) {
+        const time = Date.now() * 0.0003; // Langsame Geschwindigkeit
+        const radius = 50; // Radius um die Burg
+        const dragonX = Math.cos(-time) * radius; // Negatives time für andere Richtung
+        const dragonZ = Math.sin(-time) * radius + 200; // Burg ist bei z=200
+        
+        dragon.position.x = dragonX;
+        dragon.position.z = dragonZ;
+        
+        // Drache schaut in Laufrichtung (mit 180° Korrektur wegen Drehung)
+        dragon.rotation.y = time + Math.PI / 2;
+        
+        // Beine bewegen beim Laufen!
+        const legWalk = Math.sin(Date.now() * 0.008) * 0.4;
+        if (dragon.legs) {
+            // Vorderbeine wechselseitig
+            if (dragon.legs.frontLeft) dragon.legs.frontLeft.rotation.x = legWalk;
+            if (dragon.legs.frontRight) dragon.legs.frontRight.rotation.x = -legWalk;
+            // Hinterbeine wechselseitig (gegengleich zu vorne)
+            if (dragon.legs.backLeft) dragon.legs.backLeft.rotation.x = -legWalk;
+            if (dragon.legs.backRight) dragon.legs.backRight.rotation.x = legWalk;
+        }
+        
+        // Flügel schlagen (leichte Animation)
+        const wingFlap = Math.sin(Date.now() * 0.005) * 0.3;
+        if (dragon.children[4]) dragon.children[4].rotation.z = -Math.PI / 6 + wingFlap; // Linker Flügel
+        if (dragon.children[5]) dragon.children[5].rotation.z = Math.PI / 6 - wingFlap;  // Rechter Flügel
+        
+        // Feuer spucken! (Partikel)
+        if (Math.random() < 0.1) { // 10% Chance pro Frame
+            const fireParticle = new THREE.Mesh(
+                new THREE.SphereGeometry(1 + Math.random() * 2, 8, 8),
+                new THREE.MeshBasicMaterial({ 
+                    color: Math.random() > 0.5 ? 0xFF4500 : 0xFFA500,
+                    transparent: true,
+                    opacity: 0.8
+                })
+            );
+            
+            // Position vor dem Drachenkopf
+            const headX = dragonX + Math.cos(dragon.rotation.y) * 25;
+            const headZ = dragonZ + Math.sin(dragon.rotation.y) * 25;
+            fireParticle.position.set(headX, 15, headZ);
+            
+            // Geschwindigkeit in Blickrichtung
+            fireParticle.velocity = new THREE.Vector3(
+                Math.cos(dragon.rotation.y) * 2,
+                Math.random() * 0.5 - 0.25,
+                Math.sin(dragon.rotation.y) * 2
+            );
+            fireParticle.life = 1.0;
+            
+            scene.add(fireParticle);
+            
+            // Partikel nach kurzer Zeit entfernen
+            setTimeout(() => {
+                scene.remove(fireParticle);
+                if (fireParticle.geometry) fireParticle.geometry.dispose();
+                if (fireParticle.material) fireParticle.material.dispose();
+            }, 1000);
+        }
     }
 
     // Check if car is in any infoSpot
@@ -275,7 +406,7 @@ function animate() {
                 });
             }
             
-            uiOverlay.show(spot.title, spot.description, spot.id);
+            uiOverlay.show(spot.title, spot.description, spot.id, spot.link);
             inAnySpot = true;
             break;
         }
@@ -302,6 +433,7 @@ function animate() {
         carPosition: car.getPosition(),
         carDirection: car.getDirection(),
         colliders: colliders,
+        ramps: ramps,
         infoSpots: infoSpots,
         currentInfoSpot: gameState.currentInfoSpot,
         activeMission: missionManager.getActiveMission()
