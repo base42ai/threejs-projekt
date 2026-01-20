@@ -150,17 +150,16 @@ export class TouchControls {
         
         this.joystick.active = true;
         this.joystick.touchId = e.pointerId;
-        this.joystick.startX = e.clientX - rect.left;
-        this.joystick.startY = e.clientY - rect.top;
-        this.joystick.currentX = this.joystick.startX;
-        this.joystick.currentY = this.joystick.startY;
+        // Fixed joystick - center is always at 50% of area
+        this.joystick.startX = rect.width / 2;
+        this.joystick.startY = rect.height / 2;
+        this.joystick.currentX = e.clientX - rect.left;
+        this.joystick.currentY = e.clientY - rect.top;
         
         // Capture pointer for this element
         this.elements.joystickArea.setPointerCapture(e.pointerId);
         
-        // Position joystick base
-        this.elements.joystickBase.style.left = `${this.joystick.startX}px`;
-        this.elements.joystickBase.style.top = `${this.joystick.startY}px`;
+        // Make joystick fully visible (base stays in center)
         this.elements.joystickBase.style.opacity = '1';
         this.elements.joystickStick.style.opacity = '1';
         
@@ -190,8 +189,8 @@ export class TouchControls {
         this.touchInput.steer = 0; // Reset steer to 0 on release
         
         // Reset joystick visuals
-        this.elements.joystickBase.style.opacity = '0.3';
-        this.elements.joystickStick.style.opacity = '0.3';
+        this.elements.joystickBase.style.opacity = '0.6';
+        this.elements.joystickStick.style.opacity = '0.6';
         this.elements.joystickStick.style.transform = 'translate(-50%, -50%)';
     }
 
