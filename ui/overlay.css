@@ -270,11 +270,16 @@
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
     transition: all 0.2s ease;
+    pointer-events: auto;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0.1);
 }
 
 .link-button.mobile:active {
     transform: scale(0.95);
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    background: linear-gradient(135deg, #FFA500, #FFD700);
 }
 
 /* Mission Menu Overlay */

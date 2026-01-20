@@ -19,14 +19,20 @@ export class UIOverlay {
             }
         });
         
-        // Click auf Mobile Link-Button
+        // Click/Touch auf Mobile Link-Button
         if (this.linkButtonMobile) {
-            this.linkButtonMobile.addEventListener('click', (e) => {
+            // Use both click and touchend for better mobile compatibility
+            const openLink = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 if (this.currentLink && this.isVisible()) {
+                    console.log('Opening link:', this.currentLink);
                     window.open(this.currentLink, '_blank');
-                    e.stopPropagation();
                 }
-            });
+            };
+            
+            this.linkButtonMobile.addEventListener('click', openLink);
+            this.linkButtonMobile.addEventListener('touchend', openLink);
         }
     }
 
