@@ -92,17 +92,18 @@
     pointer-events: none;
 }
 
+#info-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
 /* On touch devices, position higher to avoid joystick overlap */
 @media (pointer: coarse) {
     #info-overlay {
         bottom: 250px;
         max-width: 400px;
     }
-}
-
-#info-overlay.visible {
-    opacity: 1;
-    visibility: visible;
 }
 
 #info-overlay h2 {
