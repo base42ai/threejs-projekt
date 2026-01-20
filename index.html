@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Minimal Projekt</title>
+    <link rel="stylesheet" href="ui/overlay.css">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Info Overlay (Bottom Center) -->
+    <div id="info-overlay">
+        <h2 id="overlay-title">Title</h2>
+        <p id="overlay-text">Description text goes here.</p>
+    </div>
+
+    <!-- Controls Info (Top Right) -->
+    <div id="controls-info">
+        <h3>Steuerung</h3>
+        <ul>
+            <li><kbd>W</kbd> / <kbd>↑</kbd> Vorwärts</li>
+            <li><kbd>S</kbd> / <kbd>↓</kbd> Rückwärts</li>
+            <li><kbd>A</kbd> / <kbd>←</kbd> Links lenken</li>
+            <li><kbd>D</kbd> / <kbd>→</kbd> Rechts lenken</li>
+            <li><kbd>M</kbd> Missionen</li>
+        </ul>
+    </div>
+
+    <!-- Minimap (Top Right, below controls) -->
+    <canvas id="minimap" width="200" height="200"></canvas>
+
+    <!-- Touch Controls (Mobile) -->
+    <div id="joystick-area">
+        <div id="joystick-base">
+            <div id="joystick-stick"></div>
+        </div>
+    </div>
+
+    <button id="throttle-btn" class="touch-button">
+        <span>⬆</span>
+        <small>Gas</small>
+    </button>
+
+    <button id="brake-btn" class="touch-button">
+        <span>⬇</span>
+        <small>Bremse</small>
+    </button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="module" src="./src/main.js"></script>
+</body>
+</html>
