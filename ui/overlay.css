@@ -92,6 +92,13 @@
     pointer-events: none;
 }
 
+/* On touch devices, position higher to avoid joystick overlap */
+@media (pointer: coarse) {
+    #info-overlay {
+        bottom: 230px;
+    }
+}
+
 #info-overlay.visible {
     opacity: 1;
     visibility: visible;
@@ -454,6 +461,8 @@
     border-radius: 50%;
     background: radial-gradient(circle, rgba(100, 100, 100, 0.4), rgba(50, 50, 50, 0.6));
     border: 3px solid rgba(255, 255, 255, 0.3);
+    left: 50%;
+    top: 50%;
     transform: translate(-50%, -50%);
     opacity: 0.3;
     transition: opacity 0.2s;
