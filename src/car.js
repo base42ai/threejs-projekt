@@ -11,6 +11,10 @@ export class Car {
         // Terrain reference für Höhenberechnung
         this.terrain = terrain;
         
+        // Check if mobile device for speed adjustment
+        this.isMobile = navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
+        this.mobileSpeedMultiplier = 1.5; // 50% schneller auf Mobile
+        
         // Jump physics
         this.verticalVelocity = 0;
         this.isAirborne = false;
@@ -18,8 +22,8 @@ export class Car {
         this.gravity = -0.02; // Etwas weniger Gravitation für längere Flugzeit
         
         // Physics properties (from constants)
-        this.maxSpeed = CAR_PHYSICS.MAX_SPEED;
-        this.acceleration = CAR_PHYSICS.ACCELERATION;
+        this.maxSpeed = CAR_PHYSICS.MAX_SPEED * (this.isMobile ? this.mobileSpeedMultiplier : 1);
+        this.acceleration = CAR_PHYSICS.ACCELERATION * (this.isMobile ? this.mobileSpeedMultiplier : 1);
         this.brakeForce = CAR_PHYSICS.BRAKE_FORCE;
         this.friction = CAR_PHYSICS.FRICTION;
         this.turnSpeed = CAR_PHYSICS.TURN_SPEED;

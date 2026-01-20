@@ -13,7 +13,16 @@ import { MissionManager } from './missions.js';
 import { Minimap } from '../ui/minimap.js';
 import { MissionUI } from './missionUI.js';
 import { audioManager } from './audio-synthetic.js';
-import { DustParticles, TireMarks, SpeedLines } from './effects.js';
+import { 
+    DustParticles, 
+    TireMarks, 
+    SpeedLines, 
+    ShaderEffectsManager,
+    HolographicInfoSpot,
+    ShieldPowerUp,
+    GlitchZone,
+    FloatingCrystal
+} from './effects.js';
 
 // Game started flag
 let gameStarted = false;
@@ -66,6 +75,35 @@ const missionUI = new MissionUI(missionManager, gameState);
 const dustParticles = new DustParticles(scene);
 const tireMarks = new TireMarks(scene);
 const speedLines = new SpeedLines(scene, camera);
+
+// Shader-Effekte Manager erstellen
+const shaderEffectsManager = new ShaderEffectsManager(scene);
+
+// Beispiel-Shader-Effekte hinzufügen (für Demonstration)
+// Holografische Portale bei bestimmten Positionen
+const holoSpot1 = new HolographicInfoSpot(scene, new THREE.Vector3(30, 0, 30), 3, 0x00ffff);
+shaderEffectsManager.addEffect(holoSpot1);
+
+const holoSpot2 = new HolographicInfoSpot(scene, new THREE.Vector3(-40, 0, -40), 2.5, 0xff00ff);
+shaderEffectsManager.addEffect(holoSpot2);
+
+// Schutzschild Power-Up
+const shieldPowerUp = new ShieldPowerUp(scene, new THREE.Vector3(0, 2, -50), 2, 0x00ff88);
+shaderEffectsManager.addEffect(shieldPowerUp);
+
+// Glitch-Zone (Gefahrenzone)
+const glitchZone = new GlitchZone(scene, new THREE.Vector3(-60, 0, 20), 15, 0.6);
+shaderEffectsManager.addEffect(glitchZone);
+
+// Schwebende Kristalle als Dekoration
+const crystal1 = new FloatingCrystal(scene, new THREE.Vector3(50, 3, -30), 0.8, 0xff00ff);
+shaderEffectsManager.addEffect(crystal1);
+
+const crystal2 = new FloatingCrystal(scene, new THREE.Vector3(-30, 3, 50), 1.0, 0x00ffff);
+shaderEffectsManager.addEffect(crystal2);
+
+const crystal3 = new FloatingCrystal(scene, new THREE.Vector3(20, 4, 60), 0.6, 0xffff00);
+shaderEffectsManager.addEffect(crystal3);
 
 // Mission Progress Display UI
 const progressDisplay = document.getElementById('mission-progress-display');
@@ -165,6 +203,69 @@ window.playSound = (name) => {
 window.stopSound = (name) => {
     audioManager.stop(name);
     console.log(`Stopped sound: ${name}`);
+};
+
+// Shader-Effekt Helper-Funktionen
+window.shaderEffects = {
+    // Alle Shader-Effekte anzeigen
+    list: () => {
+        console.log('=== Aktive Shader-Effekte ===');
+        shaderEffectsManager.effects.forEach((effect, i) => {
+            console.log(`${i}: ${effect.constructor.name}`);
+        });
+        return shaderEffectsManager.effects;
+    },
+    
+    // Neues holografisches Portal hinzufügen
+    addPortal: (x, z, radius = 3, color = 0x00ffff) => {
+        const portal = new HolographicInfoSpot(
+            scene, 
+            new THREE.Vector3(x, 0, z), 
+            radius, 
+            color
+        );
+        shaderEffectsManager.addEffect(portal);
+        console.log(`Holografisches Portal hinzugefügt bei (${x}, ${z})`);
+        return portal;
+    },
+    
+    // Neuer Kristall hinzufügen
+    addCrystal: (x, y, z, radius = 1, color = 0xff00ff) => {
+        const crystal = new FloatingCrystal(
+            scene,
+            new THREE.Vector3(x, y, z),
+            radius,
+            color
+        );
+        shaderEffectsManager.addEffect(crystal);
+        console.log(`Kristall hinzugefügt bei (${x}, ${y}, ${z})`);
+        return crystal;
+    },
+    
+    // Neue Glitch-Zone hinzufügen
+    addGlitchZone: (x, z, size = 10, intensity = 0.5) => {
+        const zone = new GlitchZone(
+            scene,
+            new THREE.Vector3(x, 0, z),
+            size,
+            intensity
+        );
+        shaderEffectsManager.addEffect(zone);
+        console.log(`Glitch-Zone hinzugefügt bei (${x}, ${z})`);
+        return zone;
+    },
+    
+    // Effekt entfernen
+    remove: (effect) => {
+        shaderEffectsManager.removeEffect(effect);
+        console.log('Effekt entfernt');
+    },
+    
+    // Alle Effekte entfernen
+    clearAll: () => {
+        shaderEffectsManager.clear();
+        console.log('Alle Shader-Effekte entfernt');
+    }
 };
 
 // Event listeners for game events
@@ -306,6 +407,19 @@ function animate() {
     dustParticles.update();
     tireMarks.update();
     speedLines.update(car.getPosition(), Math.abs(car.velocity));
+    
+    // Update Shader-Effekte (deltaTime in Sekunden)
+    const deltaTime = 0.016; // ca. 60fps
+    shaderEffectsManager.update(deltaTime);
+    
+    // Interaktion: Auto in Glitch-Zone -> Camera Shake
+    const carPosForGlitch = car.getPosition();
+    if (glitchZone.isInZone(carPosForGlitch)) {
+        // Leichter Shake-Effekt in Glitch-Zone
+        if (Math.random() < 0.1) {
+            cameraShake.startShake(100, 0.3);
+        }
+    }
     
     // Staub-Partikel spawnen bei schneller Fahrt
     const speed = Math.abs(car.velocity);
