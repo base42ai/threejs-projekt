@@ -33,7 +33,7 @@ aw<!DOCTYPE html>
         <h2 id="overlay-title">Title</h2>
         <p id="overlay-text">Description text goes here.</p>
         <div id="link-hint-desktop" class="link-hint desktop">Drücke Enter um Link zu öffnen</div>
-        <div id="link-hint-mobile" class="link-hint mobile">Tippe hier um Link zu öffnen 👆</div>
+        <button id="link-button-mobile" class="link-button mobile">🔗 Link öffnen</button>
     </div>
 
     <!-- Controls Info (Top Right) -->
@@ -76,13 +76,6 @@ aw<!DOCTYPE html>
         <span>⬇</span>
         <small>Bremse</small>
     </button>
-
-    <!-- Info Panel (shown by triggerAction) -->
-    <div id="action-info-panel">
-        <h3>🎮 Info</h3>
-        <p>Dies ist ein Test Info-Panel!</p>
-        <p>Aktiviert durch INFO Button (Touch) oder E-Taste (Desktop).</p>
-    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script type="module" src="./src/main.js"></script>

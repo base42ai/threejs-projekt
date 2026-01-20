@@ -129,21 +129,9 @@
 
 #info-overlay .link-hint.mobile {
     display: none;
-    animation: pulse 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.05);
-        opacity: 0.8;
-    }
-}
-
-/* Controls Info (Top Right) */
+/* Link Button for Mobile in Overlay */
 #controls-info {
     position: fixed;
     top: 20px;
@@ -259,59 +247,25 @@
     display: none;
 }
 
-/* INFO Button styling */
-#info-btn {
-    bottom: 120px;
-    left: 20px;
-    background: radial-gradient(circle, rgba(50, 100, 200, 0.7), rgba(30, 70, 150, 0.8));
-    border-color: rgba(100, 150, 255, 0.4);
-}
-
-#info-btn:active,
-#info-btn.active {
-    background: radial-gradient(circle, rgba(70, 130, 230, 0.9), rgba(50, 100, 200, 0.95));
-}
-
-#info-btn span {
-    font-size: 32px;
-}
-
-/* Action Info Panel */
-#action-info-panel {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.95);
-    border: 3px solid #4CAF50;
-    border-radius: 15px;
-    padding: 25px 35px;
-    max-width: 400px;
-    z-index: 3000;
-    color: white;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-#action-info-panel.visible {
-    opacity: 1;
-    visibility: visible;
-}
-
-#action-info-panel h3 {
-    margin: 0 0 15px 0;
-    font-size: 24px;
-    color: #4CAF50;
-    text-align: center;
-}
-
-#action-info-panel p {
-    margin: 10px 0;
+/* Link Button for Mobile in Overlay */
+.link-button.mobile {
+    display: none;
+    margin-top: 15px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    border: none;
+    border-radius: 25px;
+    color: #000;
     font-size: 16px;
-    line-height: 1.5;
-    color: #ddd;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    transition: all 0.2s ease;
+}
+
+.link-button.mobile:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
 }
 
 /* Mission Menu Overlay */

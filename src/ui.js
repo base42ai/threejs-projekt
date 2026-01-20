@@ -5,7 +5,7 @@ export class UIOverlay {
         this.title = document.getElementById('overlay-title');
         this.text = document.getElementById('overlay-text');
         this.linkHintDesktop = document.getElementById('link-hint-desktop');
-        this.linkHintMobile = document.getElementById('link-hint-mobile');
+        this.linkButtonMobile = document.getElementById('link-button-mobile');
         this.currentSpotId = null;
         this.currentLink = null;
         
@@ -19,13 +19,15 @@ export class UIOverlay {
             }
         });
         
-        // Touch/Click auf Overlay für Link-Öffnung (Mobile)
-        this.overlay.addEventListener('click', (e) => {
-            if (this.currentLink && this.isVisible() && this.isTouchDevice) {
-                window.open(this.currentLink, '_blank');
-                e.stopPropagation();
-            }
-        });
+        // Click auf Mobile Link-Button
+        if (this.linkButtonMobile) {
+            this.linkButtonMobile.addEventListener('click', (e) => {
+                if (this.currentLink && this.isVisible()) {
+                    window.open(this.currentLink, '_blank');
+                    e.stopPropagation();
+                }
+            });
+        }
     }
 
     show(title, text, spotId, link = null) {
@@ -40,21 +42,18 @@ export class UIOverlay {
         this.overlay.classList.add('visible');
         this.currentSpotId = spotId;
         
-        // Show/hide link hints based on device and link presence
+        // Show/hide link hints/buttons based on device and link presence
         if (link) {
             if (this.isTouchDevice) {
                 this.linkHintDesktop.style.display = 'none';
-                this.linkHintMobile.style.display = 'block';
-                // Make overlay clickable with cursor pointer
-                this.overlay.style.cursor = 'pointer';
+                this.linkButtonMobile.style.display = 'block';
             } else {
                 this.linkHintDesktop.style.display = 'block';
-                this.linkHintMobile.style.display = 'none';
+                this.linkButtonMobile.style.display = 'none';
             }
         } else {
             this.linkHintDesktop.style.display = 'none';
-            this.linkHintMobile.style.display = 'none';
-            this.overlay.style.cursor = 'default';
+            this.linkButtonMobile.style.display = 'none';
         }
     }
 
@@ -63,8 +62,7 @@ export class UIOverlay {
         this.currentSpotId = null;
         this.currentLink = null;
         this.linkHintDesktop.style.display = 'none';
-        this.linkHintMobile.style.display = 'none';
-        this.overlay.style.cursor = 'default';
+        this.linkButtonMobile.style.display = 'none';
     }
 
     isVisible() {
