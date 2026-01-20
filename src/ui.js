@@ -4,10 +4,15 @@ export class UIOverlay {
         this.overlay = document.getElementById('info-overlay');
         this.title = document.getElementById('overlay-title');
         this.text = document.getElementById('overlay-text');
+        this.linkHintDesktop = document.getElementById('link-hint-desktop');
+        this.linkHintMobile = document.getElementById('link-hint-mobile');
         this.currentSpotId = null;
         this.currentLink = null;
         
-        // Enter-Taste für Link-Öffnung
+        // Check if touch device
+        this.isTouchDevice = navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
+        
+        // Enter-Taste für Link-Öffnung (Desktop)
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && this.currentLink && this.isVisible()) {
                 window.open(this.currentLink, '_blank');
@@ -26,12 +31,28 @@ export class UIOverlay {
         this.currentLink = link;
         this.overlay.classList.add('visible');
         this.currentSpotId = spotId;
+        
+        // Show/hide link hints based on device and link presence
+        if (link) {
+            if (this.isTouchDevice) {
+                this.linkHintDesktop.style.display = 'none';
+                this.linkHintMobile.style.display = 'block';
+            } else {
+                this.linkHintDesktop.style.display = 'block';
+                this.linkHintMobile.style.display = 'none';
+            }
+        } else {
+            this.linkHintDesktop.style.display = 'none';
+            this.linkHintMobile.style.display = 'none';
+        }
     }
 
     hide() {
         this.overlay.classList.remove('visible');
         this.currentSpotId = null;
         this.currentLink = null;
+        this.linkHintDesktop.style.display = 'none';
+        this.linkHintMobile.style.display = 'none';
     }
 
     isVisible() {
@@ -40,5 +61,9 @@ export class UIOverlay {
 
     getCurrentSpotId() {
         return this.currentSpotId;
+    }
+    
+    getCurrentLink() {
+        return this.currentLink;
     }
 }

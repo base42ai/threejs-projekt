@@ -302,7 +302,16 @@ export class TouchControls {
     }
 
     triggerAction() {
-        // Show info panel
+        // Check if we're at a spot with a link (e.g., Ritterburg)
+        const uiOverlay = window.uiOverlay;
+        if (uiOverlay && uiOverlay.isVisible() && uiOverlay.getCurrentLink()) {
+            // Open the link
+            window.open(uiOverlay.getCurrentLink(), '_blank');
+            console.log('🔗 Opening link from INFO button');
+            return;
+        }
+        
+        // Otherwise show info panel
         const infoPanel = document.getElementById('action-info-panel');
         if (infoPanel) {
             infoPanel.classList.add('visible');

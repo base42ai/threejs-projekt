@@ -44,6 +44,9 @@ const { getState: getInputState } = createInput();
 // UI Overlay erstellen
 const uiOverlay = new UIOverlay();
 
+// Make uiOverlay globally accessible for touch controls
+window.uiOverlay = uiOverlay;
+
 // Particle system erstellen
 const particleSystem = new ParticleSystem(scene);
 
