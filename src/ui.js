@@ -18,6 +18,14 @@ export class UIOverlay {
                 window.open(this.currentLink, '_blank');
             }
         });
+        
+        // Touch/Click auf Overlay für Link-Öffnung (Mobile)
+        this.overlay.addEventListener('click', (e) => {
+            if (this.currentLink && this.isVisible() && this.isTouchDevice) {
+                window.open(this.currentLink, '_blank');
+                e.stopPropagation();
+            }
+        });
     }
 
     show(title, text, spotId, link = null) {
@@ -37,6 +45,8 @@ export class UIOverlay {
             if (this.isTouchDevice) {
                 this.linkHintDesktop.style.display = 'none';
                 this.linkHintMobile.style.display = 'block';
+                // Make overlay clickable with cursor pointer
+                this.overlay.style.cursor = 'pointer';
             } else {
                 this.linkHintDesktop.style.display = 'block';
                 this.linkHintMobile.style.display = 'none';
@@ -44,6 +54,7 @@ export class UIOverlay {
         } else {
             this.linkHintDesktop.style.display = 'none';
             this.linkHintMobile.style.display = 'none';
+            this.overlay.style.cursor = 'default';
         }
     }
 
@@ -53,6 +64,7 @@ export class UIOverlay {
         this.currentLink = null;
         this.linkHintDesktop.style.display = 'none';
         this.linkHintMobile.style.display = 'none';
+        this.overlay.style.cursor = 'default';
     }
 
     isVisible() {

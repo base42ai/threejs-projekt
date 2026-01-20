@@ -7,8 +7,7 @@ export class TouchControls {
         this.touchInput = {
             steer: 0,      // -1 (left) to 1 (right)
             throttle: false,
-            brake: false,
-            action: false  // INFO button
+            brake: false
         };
 
         // Joystick state
@@ -31,10 +30,6 @@ export class TouchControls {
             brake: {
                 active: false,
                 touchId: null
-            },
-            info: {
-                active: false,
-                touchId: null
             }
         };
 
@@ -44,8 +39,7 @@ export class TouchControls {
             joystickBase: null,
             joystickStick: null,
             throttleBtn: null,
-            brakeBtn: null,
-            infoBtn: null
+            brakeBtn: null
         };
 
         this.init();
@@ -76,7 +70,6 @@ export class TouchControls {
         this.elements.joystickStick = document.getElementById('joystick-stick');
         this.elements.throttleBtn = document.getElementById('throttle-btn');
         this.elements.brakeBtn = document.getElementById('brake-btn');
-        this.elements.infoBtn = document.getElementById('info-btn');
 
         // Show touch controls on touch devices
         if (this.elements.joystickArea) {
@@ -85,9 +78,6 @@ export class TouchControls {
         if (this.elements.throttleBtn && this.elements.brakeBtn) {
             this.elements.throttleBtn.style.display = 'flex';
             this.elements.brakeBtn.style.display = 'flex';
-        }
-        if (this.elements.infoBtn) {
-            this.elements.infoBtn.style.display = 'flex';
         }
     }
 
@@ -112,13 +102,6 @@ export class TouchControls {
             this.elements.brakeBtn.addEventListener('pointerdown', (e) => this.handleButtonStart(e, 'brake'));
             this.elements.brakeBtn.addEventListener('pointerup', (e) => this.handleButtonEnd(e, 'brake'));
             this.elements.brakeBtn.addEventListener('pointercancel', (e) => this.handleButtonEnd(e, 'brake'));
-        }
-
-        // Info button events with Pointer API
-        if (this.elements.infoBtn) {
-            this.elements.infoBtn.addEventListener('pointerdown', (e) => this.handleInfoButtonStart(e));
-            this.elements.infoBtn.addEventListener('pointerup', (e) => this.handleButtonEnd(e, 'info'));
-            this.elements.infoBtn.addEventListener('pointercancel', (e) => this.handleButtonEnd(e, 'info'));
         }
     }
 
@@ -280,51 +263,6 @@ export class TouchControls {
         e.currentTarget.classList.remove('active');
     }
 
-    handleInfoButtonStart(e) {
-        e.preventDefault();
-        
-        // Only handle touch/pen pointers, not mouse
-        if (e.pointerType === 'mouse') return;
-        
-        if (this.buttons.info.active) return; // Already pressed
-        
-        this.buttons.info.active = true;
-        this.buttons.info.touchId = e.pointerId;
-        
-        // Capture pointer for this element
-        e.currentTarget.setPointerCapture(e.pointerId);
-        
-        // Visual feedback
-        e.currentTarget.classList.add('active');
-        
-        // Trigger action immediately on press
-        this.triggerAction();
-    }
-
-    triggerAction() {
-        // Check if we're at a spot with a link (e.g., Ritterburg)
-        const uiOverlay = window.uiOverlay;
-        if (uiOverlay && uiOverlay.isVisible() && uiOverlay.getCurrentLink()) {
-            // Open the link
-            window.open(uiOverlay.getCurrentLink(), '_blank');
-            console.log('🔗 Opening link from INFO button');
-            return;
-        }
-        
-        // Otherwise show info panel
-        const infoPanel = document.getElementById('action-info-panel');
-        if (infoPanel) {
-            infoPanel.classList.add('visible');
-            
-            // Auto-hide after 3 seconds
-            setTimeout(() => {
-                infoPanel.classList.remove('visible');
-            }, 3000);
-        }
-        
-        console.log('🎮 INFO Button triggered!');
-    }
-
     getTouchInput() {
         return this.touchInput;
     }
@@ -333,14 +271,8 @@ export class TouchControls {
         return this.enabled && (
             this.joystick.active || 
             this.buttons.throttle.active || 
-            this.buttons.brake.active ||
-            this.buttons.info.active
+            this.buttons.brake.active
         );
-    }
-
-    // Expose triggerAction for external use (e.g., keyboard binding)
-    getTriggerAction() {
-        return () => this.triggerAction();
     }
 }
 
