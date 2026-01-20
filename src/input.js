@@ -5,20 +5,6 @@ export function createInput() {
     
     window.addEventListener('keydown', (e) => {
         keys[e.key.toLowerCase()] = true;
-        
-        // E-Taste für triggerAction (Info/Link)
-        if (e.key.toLowerCase() === 'e') {
-            // Check if we're at a spot with a link
-            const uiOverlay = window.uiOverlay;
-            if (uiOverlay && uiOverlay.isVisible() && uiOverlay.getCurrentLink()) {
-                // Open the link (same as Enter key)
-                window.open(uiOverlay.getCurrentLink(), '_blank');
-            } else {
-                // Otherwise show info panel
-                const triggerAction = touchControls.getTriggerAction();
-                triggerAction();
-            }
-        }
     });
     
     window.addEventListener('keyup', (e) => {

@@ -250,7 +250,14 @@
 /* INFO Button styling */
 #info-btn {
     bottom: 120px;
-    right: 20px;
+    left: 20px;
+    background: radial-gradient(circle, rgba(50, 100, 200, 0.7), rgba(30, 70, 150, 0.8));
+    border-color: rgba(100, 150, 255, 0.4);
+}
+
+#info-btn:active,
+#info-btn.active {
+    background: radial-gradient(circle, rgba(70, 130, 230, 0.9), rgba(50, 100, 200, 0.95));
 }
 
 #info-btn span {
