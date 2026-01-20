@@ -2,11 +2,19 @@
 
 // Car Physics
 export const CAR_PHYSICS = {
-    MAX_SPEED: 0.5,
-    ACCELERATION: 0.02,
-    FRICTION: 0.95,
-    TURN_SPEED: 0.02,
-    TURN_SPEED_MULTIPLIER: 2
+    MAX_SPEED: 0.8,              // Höhere Maximalgeschwindigkeit
+    ACCELERATION: 0.015,          // Langsamere Beschleunigung (realistischer)
+    BRAKE_FORCE: 0.04,           // Stärkere Bremskraft
+    FRICTION: 0.98,              // Weniger Reibung (Auto rollt weiter)
+    ROLLING_RESISTANCE: 0.008,   // Verlangsamung ohne Gas
+    TURN_SPEED: 0.025,
+    TURN_SPEED_MULTIPLIER: 1.8,
+    DRIFT_FACTOR: 0.92,          // Drift bei hoher Geschwindigkeit
+    DRIFT_THRESHOLD: 0.4,        // Ab dieser Geschwindigkeit kann gedriftet werden
+    REVERSE_SPEED_MULTIPLIER: 0.6, // Rückwärtsgang langsamer
+    WEIGHT: 1200,                // Gewicht in kg (für Trägheit)
+    STEERING_RETURN_SPEED: 0.2,  // Lenkräder kehren zur Mitte zurück (schneller)
+    MAX_STEER_ANGLE: 0.7        // Maximaler Lenkwinkel (40°) - deutlich sichtbar!
 };
 
 // World Boundaries
