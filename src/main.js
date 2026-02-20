@@ -31,9 +31,12 @@ let gameStarted = false;
 // Renderer mit Schatten (from constants)
 const renderer = new THREE.WebGLRenderer({ antialias: RENDERER_SETTINGS.ANTIALIAS });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = RENDERER_SETTINGS.SHADOW_MAP_ENABLED;
-renderer.shadowMap.type = THREE.PCFShadowShadowMap;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.8;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
 // Scene erstellen
