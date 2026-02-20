@@ -1,4 +1,5 @@
 // Offroad-Sandwege für Abenteuer
+import * as THREE from 'three';
 
 export function createRoads(scene) {
     const roads = [];

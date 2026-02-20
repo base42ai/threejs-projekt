@@ -1,8 +1,9 @@
 // Visuelle Effekte für Realismus
-import { 
-    ShaderEffect, 
-    HolographicPortal, 
-    EnergyShield, 
+import * as THREE from 'three';
+import {
+    ShaderEffect,
+    HolographicPortal,
+    EnergyShield,
     GlitchPlane,
     WaveFloor,
     ChromaticSphere

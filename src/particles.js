@@ -1,4 +1,5 @@
 // Simple Particle System for Explosions
+import * as THREE from 'three';
 
 export class ParticleSystem {
     constructor(scene) {

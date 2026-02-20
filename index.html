@@ -1,4 +1,4 @@
-aw<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -77,7 +77,13 @@ aw<!DOCTYPE html>
         <small>Bremse</small>
     </button>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+        }
+      }
+    </script>
     <script type="module" src="./src/main.js"></script>
 </body>
 </html>

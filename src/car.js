@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { CAR_PHYSICS, WORLD_BOUNDS, ANIMATION } from './constants.js';
 
 export class Car {

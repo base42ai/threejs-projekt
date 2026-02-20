@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { createScene } from './scene.js';
 import { createWorld } from './world.js';
 import { Car } from './car.js';

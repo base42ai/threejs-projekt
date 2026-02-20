@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { LIGHTING, WORLD_GEN } from './constants.js';
 
 export function createScene() {

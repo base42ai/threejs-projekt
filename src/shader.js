@@ -1,4 +1,5 @@
 // Custom GLSL Shader für spezielle visuelle Effekte
+import * as THREE from 'three';
 
 // ===== 1. HOLOGRAPHIC SHADER =====
 // Holografischer Effekt mit Scan-Lines und Farbverschiebung

@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { CAMERA_SETTINGS } from './constants.js';
 
 export function createFollowCamera() {

@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { createRoads } from './roads.js';
 import { TerrainHeightMap } from './terrain.js';
 import { INFO_SPOTS } from './infoSpots.js';
