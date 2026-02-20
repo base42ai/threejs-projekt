@@ -1,4 +1,5 @@
 // Camera Shake Utility
+import * as THREE from 'three';
 
 export class CameraShake {
     constructor() {
