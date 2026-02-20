@@ -16,7 +16,7 @@ export function createWorld(scene) {
         
         // Stamm
         const trunkGeometry = new THREE.CylinderGeometry(1.5, 2, 8, 8);
-        const trunkMaterial = new THREE.MeshPhongMaterial({ color: 0x5C3D2E });
+        const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x5C3D2E, roughness: 0.95, metalness: 0.0 });
         const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
         trunk.position.y = 4;
         trunk.castShadow = true;
@@ -25,7 +25,7 @@ export function createWorld(scene) {
 
         // Krone (mehrere Kugeln)
         const foliageGeometry = new THREE.IcosahedronGeometry(5, 3);
-        const foliageMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 });
+        const foliageMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.9, metalness: 0.0 });
         
         const foliageLevels = [
             { y: 13, scale: 1 },
@@ -78,11 +78,14 @@ export function createWorld(scene) {
 
     // ===== BESONDERE ORTE =====
     
-    // See
+    // See (PBR-Wasser mit Reflektion)
     const lakeGeometry = new THREE.CircleGeometry(60, 64);
-    const lakeMaterial = new THREE.MeshPhongMaterial({ 
-        color: 0x1E90FF,
-        shininess: 100
+    const lakeMaterial = new THREE.MeshStandardMaterial({
+        color: 0x1A6FA8,
+        roughness: 0.05,
+        metalness: 0.9,
+        transparent: true,
+        opacity: 0.88
     });
     const lake = new THREE.Mesh(lakeGeometry, lakeMaterial);
     lake.rotation.x = -Math.PI / 2;
@@ -198,7 +201,7 @@ export function createWorld(scene) {
     
     // Hauptturm (Bergfried)
     const mainTowerGeo = new THREE.CylinderGeometry(12, 14, 50, 8);
-    const stoneMat = new THREE.MeshPhongMaterial({ color: 0x808080 });
+    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.92, metalness: 0.05 });
     const mainTower = new THREE.Mesh(mainTowerGeo, stoneMat);
     mainTower.position.y = 25;
     mainTower.castShadow = true;
@@ -267,7 +270,7 @@ export function createWorld(scene) {
     
     // Burgmauern zwischen den Türmen
     const wallGeo = new THREE.BoxGeometry(50, 25, 4);
-    const wallMat = new THREE.MeshPhongMaterial({ color: 0x707070 });
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0x707070, roughness: 0.95, metalness: 0.0 });
     
     // Mauer Nord
     const wallN = new THREE.Mesh(wallGeo, wallMat);
@@ -960,13 +963,14 @@ export function createWorld(scene) {
     beachGround.receiveShadow = true;
     scene.add(beachGround);
     
-    // Meer (Wasser)
+    // Meer (PBR-Wasser)
     const oceanGeo = new THREE.CircleGeometry(130, 32);
-    const oceanMat = new THREE.MeshPhongMaterial({ 
-        color: 0x006994,
-        shininess: 100,
+    const oceanMat = new THREE.MeshStandardMaterial({
+        color: 0x004E7A,
+        roughness: 0.03,
+        metalness: 0.95,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.85
     });
     const ocean = new THREE.Mesh(oceanGeo, oceanMat);
     ocean.rotation.x = -Math.PI / 2;
