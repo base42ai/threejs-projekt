@@ -40,7 +40,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
 // Scene erstellen
-const { scene } = createScene();
+const { scene, planetGroup } = createScene();
 
 // Welt erstellen (Bäume, Häuser, See, etc.)
 const { windmillBlades, infoSpots, colliders, ramps, roads, terrain, dragon } = createWorld(scene);
@@ -448,6 +448,14 @@ function animate() {
     // Windmühlenflügel rotieren (from constants)
     if (windmillBlades) {
         windmillBlades.rotation.z += ANIMATION.WINDMILL_ROTATION_SPEED;
+    }
+
+    // Planet langsam rotieren
+    if (planetGroup && planetGroup.children[0]) {
+        planetGroup.children[0].rotation.y += 0.00012; // Planetenkugel
+        if (planetGroup.children.length > 4) {
+            planetGroup.children[4].rotation.z += 0.00008; // Wolkenschicht etwas schneller
+        }
     }
     
     // Drache um die Ritterburg laufen lassen

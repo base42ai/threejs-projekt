@@ -329,124 +329,309 @@ export function createWorld(scene) {
     castleGroup.position.set(0, 0, 200);
     scene.add(castleGroup);
     
-    // DRACHE bei der Ritterburg - GROß UND ROT!
+    // ===== REALISTISCHER DRACHE bei der Ritterburg =====
     const dragonGroup = new THREE.Group();
-    
-    // Drachenkörper
-    const bodyGeo = new THREE.CylinderGeometry(3, 4, 12, 8);
-    const dragonMat = new THREE.MeshPhongMaterial({ 
-        color: 0xCC0000,  // Rot!
-        emissive: 0x550000,
-        shininess: 30
+
+    // Materialien – Schuppen-Look durch flatShading + verschiedene Farbtöne
+    const dragonScaleMat = new THREE.MeshStandardMaterial({
+        color: 0xB71C1C,
+        roughness: 0.6,
+        metalness: 0.15,
+        flatShading: true
     });
-    const body = new THREE.Mesh(bodyGeo, dragonMat);
-    body.rotation.z = Math.PI / 2;
-    body.position.y = 6;
-    body.castShadow = true;
-    dragonGroup.add(body);
-    
-    // Drachenkopf
-    const headGeo = new THREE.ConeGeometry(3, 5, 8);
-    const head = new THREE.Mesh(headGeo, dragonMat);
-    head.rotation.z = -Math.PI / 2;
-    head.position.set(8, 6, 0);
-    head.castShadow = true;
-    dragonGroup.add(head);
-    
-    // Augen
-    const eyeGeo = new THREE.SphereGeometry(0.5, 8, 8);
-    const eyeMat = new THREE.MeshPhongMaterial({ color: 0xFFFF00, emissive: 0xFFFF00 });
-    const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
-    eyeL.position.set(9, 7, -1);
-    dragonGroup.add(eyeL);
-    const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
-    eyeR.position.set(9, 7, 1);
-    dragonGroup.add(eyeR);
-    
-    // Hörner
-    const hornGeo = new THREE.ConeGeometry(0.5, 2, 6);
-    const hornL = new THREE.Mesh(hornGeo, new THREE.MeshPhongMaterial({ color: 0x000000 }));
-    hornL.position.set(8, 9, -1.5);
-    hornL.rotation.z = Math.PI / 4;
-    hornL.castShadow = true;
-    dragonGroup.add(hornL);
-    const hornR = new THREE.Mesh(hornGeo, new THREE.MeshPhongMaterial({ color: 0x000000 }));
-    hornR.position.set(8, 9, 1.5);
-    hornR.rotation.z = Math.PI / 4;
-    hornR.castShadow = true;
-    dragonGroup.add(hornR);
-    
-    // Flügel (links)
-    const wingGeo = new THREE.ConeGeometry(6, 10, 3);
-    const wingMat = new THREE.MeshPhongMaterial({ 
-        color: 0x8B0000, 
+    const dragonBellyMat = new THREE.MeshStandardMaterial({
+        color: 0xE57373,
+        roughness: 0.75,
+        metalness: 0.05,
+        flatShading: true
+    });
+    const dragonDarkMat = new THREE.MeshStandardMaterial({
+        color: 0x7F0000,
+        roughness: 0.5,
+        metalness: 0.2,
+        flatShading: true
+    });
+    const dragonWingMat = new THREE.MeshStandardMaterial({
+        color: 0x8B0000,
+        roughness: 0.8,
+        metalness: 0.0,
         side: THREE.DoubleSide,
-        emissive: 0x330000
+        transparent: true,
+        opacity: 0.92
     });
-    const wingL = new THREE.Mesh(wingGeo, wingMat);
-    wingL.rotation.x = Math.PI / 2;
-    wingL.rotation.z = -Math.PI / 6;
-    wingL.position.set(0, 10, -5);
-    wingL.castShadow = true;
-    dragonGroup.add(wingL);
-    
-    // Flügel (rechts)
-    const wingR = new THREE.Mesh(wingGeo, wingMat);
-    wingR.rotation.x = Math.PI / 2;
-    wingR.rotation.z = Math.PI / 6;
-    wingR.position.set(0, 10, 5);
-    wingR.castShadow = true;
-    dragonGroup.add(wingR);
-    
-    // Schwanz
-    const tailSegments = 5;
-    for (let i = 0; i < tailSegments; i++) {
-        const size = 2.5 - i * 0.4;
-        const tailGeo = new THREE.SphereGeometry(size, 8, 8);
-        const tailSegment = new THREE.Mesh(tailGeo, dragonMat);
-        tailSegment.position.set(-6 - i * 2, 6 - i * 0.5, 0);
-        tailSegment.castShadow = true;
-        dragonGroup.add(tailSegment);
+    const hornMat = new THREE.MeshStandardMaterial({ color: 0x1A1A1A, roughness: 0.4, metalness: 0.3 });
+    const clawMat = new THREE.MeshStandardMaterial({ color: 0x212121, roughness: 0.3, metalness: 0.4 });
+    const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xFFFF88, emissive: 0xFFDD00, emissiveIntensity: 0.8, roughness: 0.1 });
+    const eyePupilMat = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.0 });
+
+    // === KÖRPER (mehrere Segmente für organischen Look) ===
+    // Hauptkörper – breit und muskulös
+    const torsoGeo = new THREE.SphereGeometry(4, 12, 10);
+    torsoGeo.scale(1.8, 1.0, 1.0);
+    const torso = new THREE.Mesh(torsoGeo, dragonScaleMat);
+    torso.position.set(0, 7, 0);
+    torso.castShadow = true;
+    dragonGroup.add(torso);
+
+    // Bauch (heller)
+    const bellyGeo = new THREE.SphereGeometry(3.2, 10, 8);
+    bellyGeo.scale(1.6, 0.6, 0.8);
+    const belly = new THREE.Mesh(bellyGeo, dragonBellyMat);
+    belly.position.set(0, 5.8, 0);
+    dragonGroup.add(belly);
+
+    // Brust / Schulterbereich
+    const chestGeo = new THREE.SphereGeometry(3.5, 10, 8);
+    chestGeo.scale(1.2, 1.1, 1.0);
+    const chest = new THREE.Mesh(chestGeo, dragonScaleMat);
+    chest.position.set(5, 7.5, 0);
+    chest.castShadow = true;
+    dragonGroup.add(chest);
+
+    // === HALS (mehrere Segmente) ===
+    const neckSegments = [
+        { x: 7, y: 8.5, sx: 0.9, sy: 1.0, sz: 0.9 },
+        { x: 9, y: 9.5, sx: 0.8, sy: 0.9, sz: 0.85 },
+        { x: 11, y: 10.5, sx: 0.75, sy: 0.85, sz: 0.8 },
+    ];
+    neckSegments.forEach(s => {
+        const nGeo = new THREE.SphereGeometry(2.2, 8, 6);
+        nGeo.scale(s.sx, s.sy, s.sz);
+        const nMesh = new THREE.Mesh(nGeo, dragonScaleMat);
+        nMesh.position.set(s.x, s.y, 0);
+        nMesh.castShadow = true;
+        dragonGroup.add(nMesh);
+    });
+
+    // === KOPF ===
+    const headGroup = new THREE.Group();
+    headGroup.position.set(13, 11, 0);
+
+    // Schädel
+    const skullGeo = new THREE.SphereGeometry(2.5, 10, 8);
+    skullGeo.scale(1.3, 1.0, 1.0);
+    const skull = new THREE.Mesh(skullGeo, dragonScaleMat);
+    skull.castShadow = true;
+    headGroup.add(skull);
+
+    // Schnauze (länglich, spitz)
+    const snoutGeo = new THREE.CylinderGeometry(0.8, 1.5, 4, 8);
+    const snout = new THREE.Mesh(snoutGeo, dragonScaleMat);
+    snout.rotation.z = Math.PI / 2;
+    snout.position.set(3, -0.3, 0);
+    snout.castShadow = true;
+    headGroup.add(snout);
+
+    // Unterkiefer
+    const jawGeo = new THREE.CylinderGeometry(0.5, 1.2, 3.5, 8);
+    const jaw = new THREE.Mesh(jawGeo, dragonBellyMat);
+    jaw.rotation.z = Math.PI / 2;
+    jaw.position.set(2.5, -1.2, 0);
+    headGroup.add(jaw);
+
+    // Nasenlöcher
+    for (let side of [-0.5, 0.5]) {
+        const nostrilGeo = new THREE.SphereGeometry(0.22, 6, 6);
+        const nostril = new THREE.Mesh(nostrilGeo, dragonDarkMat);
+        nostril.position.set(4.5, 0.1, side);
+        headGroup.add(nostril);
     }
-    
-    // Schwanzspitze
-    const tailTipGeo = new THREE.ConeGeometry(2, 4, 6);
-    const tailTip = new THREE.Mesh(tailTipGeo, new THREE.MeshPhongMaterial({ color: 0xFF4500 }));
-    tailTip.rotation.z = Math.PI / 2;
-    tailTip.position.set(-16, 4, 0);
+
+    // Augen (realistisch mit Pupille)
+    for (let side of [-1.2, 1.2]) {
+        const eyeGroup = new THREE.Group();
+        eyeGroup.position.set(0.5, 0.8, side);
+
+        const eyeballGeo = new THREE.SphereGeometry(0.55, 10, 10);
+        const eyeball = new THREE.Mesh(eyeballGeo, eyeWhiteMat);
+        eyeGroup.add(eyeball);
+
+        const pupilGeo = new THREE.SphereGeometry(0.28, 8, 8);
+        const pupil = new THREE.Mesh(pupilGeo, eyePupilMat);
+        pupil.position.set(0.35, 0.1, side > 0 ? 0.1 : -0.1);
+        eyeGroup.add(pupil);
+
+        // Augenbrauen-Schuppe
+        const browGeo = new THREE.BoxGeometry(0.8, 0.25, 0.4);
+        const brow = new THREE.Mesh(browGeo, dragonDarkMat);
+        brow.position.set(0.2, 0.7, 0);
+        brow.rotation.z = -0.3;
+        eyeGroup.add(brow);
+
+        headGroup.add(eyeGroup);
+    }
+
+    // Hörner (gebogen, 2 Paar)
+    const makeHorn = (px, py, pz, rx, ry, rz, len) => {
+        const hGeo = new THREE.ConeGeometry(0.35, len, 7);
+        const h = new THREE.Mesh(hGeo, hornMat);
+        h.position.set(px, py, pz);
+        h.rotation.set(rx, ry, rz);
+        h.castShadow = true;
+        headGroup.add(h);
+    };
+    makeHorn(-0.5, 2.2, -1.2,  0.3, 0, -0.5, 3.5);  // Hinten links
+    makeHorn(-0.5, 2.2,  1.2,  0.3, 0,  0.5, 3.5);  // Hinten rechts
+    makeHorn( 0.5, 1.6, -0.8,  0.2, 0, -0.4, 2.2);  // Vorne links
+    makeHorn( 0.5, 1.6,  0.8,  0.2, 0,  0.4, 2.2);  // Vorne rechts
+
+    dragonGroup.add(headGroup);
+
+    // === RÜCKENSTACHELN entlang dem Rücken ===
+    const spinePositions = [
+        { x: 6, y: 10.5, size: 1.2 },
+        { x: 4, y: 10.8, size: 1.5 },
+        { x: 2, y: 11.0, size: 1.8 },
+        { x: 0, y: 10.8, size: 2.0 },
+        { x:-2, y: 10.5, size: 1.8 },
+        { x:-4, y: 10.0, size: 1.5 },
+        { x:-6, y:  9.5, size: 1.2 },
+    ];
+    spinePositions.forEach(sp => {
+        const spGeo = new THREE.ConeGeometry(0.4, sp.size, 6);
+        const spine = new THREE.Mesh(spGeo, dragonDarkMat);
+        spine.position.set(sp.x, sp.y, 0);
+        spine.castShadow = true;
+        dragonGroup.add(spine);
+    });
+
+    // === SCHWANZ (7 Segmente, dünner werdend) ===
+    const tailDefs = [
+        { x:-6, y:7, r:3.0 }, { x:-9, y:6.5, r:2.5 }, { x:-12, y:6, r:2.0 },
+        { x:-15, y:5.2, r:1.6 }, { x:-18, y:4.2, r:1.2 }, { x:-20, y:3.2, r:0.9 }, { x:-22, y:2.2, r:0.6 }
+    ];
+    tailDefs.forEach(t => {
+        const tGeo = new THREE.SphereGeometry(t.r, 9, 7);
+        const tMesh = new THREE.Mesh(tGeo, dragonScaleMat);
+        tMesh.position.set(t.x, t.y, 0);
+        tMesh.castShadow = true;
+        dragonGroup.add(tMesh);
+    });
+
+    // Schwanzspitze (Pfeil/Blatt-Form)
+    const tipGeo = new THREE.ConeGeometry(1.0, 3.5, 4);
+    const tailTip = new THREE.Mesh(tipGeo, dragonDarkMat);
+    tailTip.rotation.z = -Math.PI / 2;
+    tailTip.position.set(-24.5, 1.5, 0);
     tailTip.castShadow = true;
     dragonGroup.add(tailTip);
-    
-    // Beine
-    const legGeo = new THREE.CylinderGeometry(0.8, 1, 4, 6);
-    const legMat = new THREE.MeshPhongMaterial({ color: 0x990000 }); // Dunkelrot für Beine
-    
-    // Vorderbeine
-    const legFL = new THREE.Mesh(legGeo, legMat);
-    legFL.position.set(3, 2, -2);
-    legFL.castShadow = true;
+
+    // === FLÜGEL (realistisch mit Knochen + Membran) ===
+    function createWing(side) { // side: -1 = links, 1 = rechts
+        const wingGroup = new THREE.Group();
+
+        // Hauptknochen (Arm)
+        const bone1Geo = new THREE.CylinderGeometry(0.5, 0.7, 10, 7);
+        const bone1 = new THREE.Mesh(bone1Geo, dragonDarkMat);
+        bone1.rotation.z = side * -0.4;
+        bone1.position.set(-1, 5, 0);
+        bone1.castShadow = true;
+        wingGroup.add(bone1);
+
+        // Mittlerer Knochen (Unterarm)
+        const bone2Geo = new THREE.CylinderGeometry(0.3, 0.5, 9, 6);
+        const bone2 = new THREE.Mesh(bone2Geo, dragonDarkMat);
+        bone2.rotation.z = side * -1.1;
+        bone2.position.set(2, 8, 0);
+        bone2.castShadow = true;
+        wingGroup.add(bone2);
+
+        // Flügel-Finger (3 Stück)
+        const fingerAngles = [side * -1.6, side * -1.9, side * -2.2];
+        fingerAngles.forEach((ang, fi) => {
+            const fGeo = new THREE.CylinderGeometry(0.15, 0.3, 7 - fi * 1.2, 5);
+            const finger = new THREE.Mesh(fGeo, dragonDarkMat);
+            finger.rotation.z = ang;
+            finger.position.set(5 + fi * 0.5, 12 - fi * 0.8, side * fi * 0.5);
+            finger.castShadow = true;
+            wingGroup.add(finger);
+        });
+
+        // Membran – breite dreieckige Fläche
+        const membGeo = new THREE.BufferGeometry();
+        const verts = new Float32Array([
+            // Haupt-Membran (3 Dreiecke für volle Abdeckung)
+             0, 0, 0,    12 * side, 5, 0,     8 * side, 14, 0,
+             0, 0, 0,     8 * side, 14, 0,    3 * side, 18, 0,
+             0, 0, 0,     3 * side, 18, 0,   -2 * side, 18, 0,
+        ]);
+        membGeo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+        membGeo.computeVertexNormals();
+        const memb = new THREE.Mesh(membGeo, dragonWingMat);
+        memb.castShadow = true;
+        wingGroup.add(memb);
+
+        // Membran Rückseite (DoubleSide reicht, aber extra für Tiefe)
+        const membBack = new THREE.Mesh(membGeo, dragonWingMat);
+        membBack.rotation.y = Math.PI;
+        wingGroup.add(membBack);
+
+        wingGroup.position.set(1, 9, side * 4.5);
+        wingGroup.rotation.y = side * 0.3;
+        return wingGroup;
+    }
+
+    const wingLeft = createWing(-1);
+    const wingRight = createWing(1);
+    dragonGroup.add(wingLeft);
+    dragonGroup.add(wingRight);
+
+    // === BEINE (mit Oberschenkel, Unterschenkel, Klauen) ===
+    function createLeg(px, pz, isFront) {
+        const legGroup = new THREE.Group();
+
+        // Oberschenkel
+        const thighGeo = new THREE.CylinderGeometry(1.2, 0.9, 4.5, 7);
+        const thigh = new THREE.Mesh(thighGeo, dragonScaleMat);
+        thigh.rotation.z = 0.4;
+        thigh.position.set(0, -2, 0);
+        thigh.castShadow = true;
+        legGroup.add(thigh);
+
+        // Unterschenkel
+        const shinGeo = new THREE.CylinderGeometry(0.7, 0.5, 4, 6);
+        const shin = new THREE.Mesh(shinGeo, dragonScaleMat);
+        shin.rotation.z = -0.5;
+        shin.position.set(1.5, -5.5, 0);
+        shin.castShadow = true;
+        legGroup.add(shin);
+
+        // Fuß
+        const footGeo = new THREE.SphereGeometry(1.0, 7, 6);
+        footGeo.scale(1.4, 0.6, 1.0);
+        const foot = new THREE.Mesh(footGeo, dragonDarkMat);
+        foot.position.set(2.5, -8, 0);
+        legGroup.add(foot);
+
+        // Klauen (3 Stück)
+        for (let c = -1; c <= 1; c++) {
+            const clawGeo = new THREE.ConeGeometry(0.25, 1.5, 5);
+            const claw = new THREE.Mesh(clawGeo, clawMat);
+            claw.rotation.z = Math.PI / 2;
+            claw.position.set(3.5 + c * 0.3, -8 + c * 0.1, c * 0.6);
+            claw.castShadow = true;
+            legGroup.add(claw);
+        }
+
+        legGroup.position.set(px, 8, pz);
+        return legGroup;
+    }
+
+    const legFL = createLeg( 4.5, -3.5, true);
+    const legFR = createLeg( 4.5,  3.5, true);
+    const legBL = createLeg(-4,   -3.5, false);
+    const legBR = createLeg(-4,    3.5, false);
     dragonGroup.add(legFL);
-    const legFR = new THREE.Mesh(legGeo, legMat);
-    legFR.position.set(3, 2, 2);
-    legFR.castShadow = true;
     dragonGroup.add(legFR);
-    
-    // Hinterbeine
-    const legBL = new THREE.Mesh(legGeo, legMat);
-    legBL.position.set(-3, 2, -2);
-    legBL.castShadow = true;
     dragonGroup.add(legBL);
-    const legBR = new THREE.Mesh(legGeo, legMat);
-    legBR.position.set(-3, 2, 2);
-    legBR.castShadow = true;
     dragonGroup.add(legBR);
-    
+
     // Drache positionieren und vergrößern
-    dragonGroup.scale.set(2.5, 2.5, 2.5); // VIEL GRÖßER!
-    dragonGroup.rotation.y = Math.PI; // 180° Drehung - Kopf zeigt jetzt richtig!
+    dragonGroup.scale.set(2.5, 2.5, 2.5);
+    dragonGroup.rotation.y = Math.PI;
     dragonGroup.position.set(0, 0, 200);
     scene.add(dragonGroup);
-    
+
     // Speichere Drache für Animation (mit Referenzen auf Beine)
     const dragon = dragonGroup;
     dragon.legs = {
