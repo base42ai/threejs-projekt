@@ -16,34 +16,37 @@ export function createScene() {
     skyUniforms['mieCoefficient'].value = 0.005;
     skyUniforms['mieDirectionalG'].value = 0.85;
 
-    // Sonnenposition (Nachmittag, leicht tief für warme Stimmung)
+    // Sonnenposition (Goldene Stunde – tief, warm, dramatisch)
     const sun = new THREE.Vector3();
-    const elevation = 22; // Grad über dem Horizont
+    const elevation = 10; // Tiefe Sonne für goldene Stunde
     const azimuth = 200;
     const phi = THREE.MathUtils.degToRad(90 - elevation);
     const theta = THREE.MathUtils.degToRad(azimuth);
     sun.setFromSphericalCoords(1, phi, theta);
     skyUniforms['sunPosition'].value.copy(sun);
+    skyUniforms['turbidity'].value = 8;        // Mehr Dunst → wärmerer Horizont
+    skyUniforms['rayleigh'].value = 1.8;       // Mehr Streuung → rötlicherer Himmel
+    skyUniforms['mieCoefficient'].value = 0.008;
 
-    // Dunst am Horizont (passend zum Himmel)
-    scene.fog = new THREE.FogExp2(0xc8d8e8, 0.0012);
+    // Dunst am Horizont (warm, goldige Abenddämmerung)
+    scene.fog = new THREE.FogExp2(0xFFBB80, 0.0009);
 
     // ===== BELEUCHTUNG =====
 
-    // Hemisphären-Licht (Himmel warm, Boden kühl-grün)
+    // Hemisphären-Licht (Goldene Stunde – intensiv warm oben, sattes Grün unten)
     const hemisphereLight = new THREE.HemisphereLight(
-        0xFFF4D6,  // Warmes Sonnenlicht von oben
+        0xFFCC70,  // Goldenes Abendlicht von oben
         0x2D4A1E,  // Dunkles Grün vom Boden
-        0.9
+        1.1
     );
     scene.add(hemisphereLight);
 
-    // Sanftes Umgebungslicht
-    const ambientLight = new THREE.AmbientLight(0xFFEEDD, 0.35);
+    // Sanftes Umgebungslicht (warm orange)
+    const ambientLight = new THREE.AmbientLight(0xFFDDAA, 0.45);
     scene.add(ambientLight);
 
-    // Direktionales Sonnenlicht
-    const directionalLight = new THREE.DirectionalLight(0xFFF8E0, 2.2);
+    // Direktionales Sonnenlicht (orange-goldenes Abendlicht)
+    const directionalLight = new THREE.DirectionalLight(0xFFAA40, 2.8);
     directionalLight.position.set(80, 120, -80);
     directionalLight.shadow.mapSize.width = LIGHTING.SHADOW_MAP_SIZE;
     directionalLight.shadow.mapSize.height = LIGHTING.SHADOW_MAP_SIZE;
@@ -184,5 +187,158 @@ export function createScene() {
         scene.add(flowerGroup);
     }
 
-    return { scene };
+    // ===== PLANET MIT RINGEN IM HIMMEL =====
+    const planetGroup = new THREE.Group();
+
+    // Planetenkugel (Erde-ähnlich: Ozeane + Kontinente)
+    const planetGeo = new THREE.SphereGeometry(70, 40, 40);
+    const planetMat = new THREE.MeshStandardMaterial({
+        color: 0x2266BB,      // Tiefseeblau (Ozean)
+        roughness: 0.85,
+        metalness: 0.0,
+        emissive: 0x112244,
+        emissiveIntensity: 0.2
+    });
+    const planetMesh = new THREE.Mesh(planetGeo, planetMat);
+    planetMesh.castShadow = false;
+    planetGroup.add(planetMesh);
+
+    // Kontinente (grüne Patches auf der Oberfläche)
+    const continentColors = [0x2D6B1E, 0x3A8A26, 0x1E5512, 0x4A9030, 0x266020];
+    for (let i = 0; i < 14; i++) {
+        const r = 12 + Math.random() * 28;
+        const cGeo = new THREE.SphereGeometry(r, 12, 12);
+        const cMat = new THREE.MeshStandardMaterial({
+            color: continentColors[Math.floor(Math.random() * continentColors.length)],
+            roughness: 1.0,
+            metalness: 0.0,
+            emissive: 0x0A1A05,
+            emissiveIntensity: 0.08
+        });
+        const continent = new THREE.Mesh(cGeo, cMat);
+        const theta2 = Math.random() * Math.PI * 2;
+        const phi2 = (Math.random() * 0.8 + 0.1) * Math.PI; // Nicht an den Polen
+        continent.position.set(
+            Math.sin(phi2) * Math.cos(theta2) * 69,
+            Math.sin(phi2) * Math.sin(theta2) * 69,
+            Math.cos(phi2) * 69
+        );
+        continent.scale.set(1.0, 0.18, 1.0); // Flach aufgedrückt
+        planetGroup.add(continent);
+    }
+
+    // Eispolkappen (weiß an den Polen)
+    for (const poleSide of [1, -1]) {
+        const icGeo = new THREE.SphereGeometry(22, 16, 16);
+        const icMat = new THREE.MeshStandardMaterial({
+            color: 0xEEEEFF,
+            roughness: 0.9,
+            metalness: 0.0,
+            emissive: 0x8899BB,
+            emissiveIntensity: 0.15
+        });
+        const icecap = new THREE.Mesh(icGeo, icMat);
+        icecap.position.set(0, poleSide * 68, 0);
+        icecap.scale.set(1.0, 0.2, 1.0);
+        planetGroup.add(icecap);
+    }
+
+    // Atmosphären-Glühen (leicht blaue Hülle)
+    const atmoGeo = new THREE.SphereGeometry(76, 32, 32);
+    const atmoMat = new THREE.MeshStandardMaterial({
+        color: 0x4488FF,
+        transparent: true,
+        opacity: 0.12,
+        roughness: 1.0,
+        metalness: 0.0,
+        side: THREE.BackSide
+    });
+    const atmosphere = new THREE.Mesh(atmoGeo, atmoMat);
+    planetGroup.add(atmosphere);
+
+    // Wolkenschicht über dem Planeten
+    const pCloudGeo = new THREE.SphereGeometry(73, 28, 28);
+    const pCloudMat = new THREE.MeshStandardMaterial({
+        color: 0xFFFFFF,
+        transparent: true,
+        opacity: 0.22,
+        roughness: 1.0,
+        metalness: 0.0
+    });
+    const pCloud = new THREE.Mesh(pCloudGeo, pCloudMat);
+    planetGroup.add(pCloud);
+
+    // Saturn-ähnliche Ringe (innerer Ring)
+    const ringGeo = new THREE.RingGeometry(88, 130, 80);
+    const ringMat = new THREE.MeshStandardMaterial({
+        color: 0xC8A85A,
+        transparent: true,
+        opacity: 0.72,
+        side: THREE.DoubleSide,
+        roughness: 0.6,
+        metalness: 0.15
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI * 0.4;
+    planetGroup.add(ring);
+
+    // Äußerer, dünnerer Ring
+    const ring2Geo = new THREE.RingGeometry(136, 165, 80);
+    const ring2Mat = new THREE.MeshStandardMaterial({
+        color: 0xA08858,
+        transparent: true,
+        opacity: 0.4,
+        side: THREE.DoubleSide,
+        roughness: 0.75,
+        metalness: 0.05
+    });
+    const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+    ring2.rotation.x = Math.PI * 0.4;
+    planetGroup.add(ring2);
+
+    // Planet positionieren – hoch am Himmel, gut sichtbar
+    planetGroup.position.set(500, 380, -1300);
+    planetGroup.rotation.z = 0.18;
+    scene.add(planetGroup);
+
+    // ===== WOLKEN IM HIMMEL =====
+    function createCloud(x, y, z, scale) {
+        const cloudGroup = new THREE.Group();
+        const cloudMat = new THREE.MeshStandardMaterial({
+            color: 0xFFEEDD,   // Leicht golden durch Abendlicht
+            transparent: true,
+            opacity: 0.82,
+            roughness: 1.0,
+            metalness: 0.0
+        });
+        const count = 7 + Math.floor(Math.random() * 6);
+        for (let i = 0; i < count; i++) {
+            const r = (10 + Math.random() * 22) * scale;
+            const geo = new THREE.SphereGeometry(r, 8, 8);
+            const mesh = new THREE.Mesh(geo, cloudMat);
+            mesh.position.set(
+                (Math.random() - 0.5) * 90 * scale,
+                (Math.random() - 0.5) * 12 * scale,
+                (Math.random() - 0.5) * 35 * scale
+            );
+            mesh.scale.set(1, 0.5, 1);
+            cloudGroup.add(mesh);
+        }
+        cloudGroup.position.set(x, y, z);
+        return cloudGroup;
+    }
+
+    const cloudDefs = [
+        [120, 180, -250, 1.2],  [-280, 200, -160, 1.0],
+        [60,  170, -380, 0.9],  [-160, 230, -300, 1.3],
+        [320, 195, -190, 1.1],  [-60,  185, -420, 0.8],
+        [10,  210, -510, 1.4],  [240, 220, -130, 0.7],
+        [-330, 195, -90, 1.0],  [410, 175, -310, 1.2],
+        [-420, 215, -360, 0.9], [90,  245, -600, 1.5],
+        [180, 160, -100, 0.8],  [-200, 180, -480, 1.1],
+        [370, 240, -450, 1.3],  [-100, 165, -230, 0.7],
+    ];
+    cloudDefs.forEach(([x, y, z, s]) => scene.add(createCloud(x, y, z, s)));
+
+    return { scene, planetGroup };
 }
